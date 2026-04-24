@@ -154,7 +154,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         runningTest = "";
         progress = 0;
       });
-      speak("DEVICE NOT CONNECTED . Please connect device and try again");
+      await speak("DEVICE NOT CONNECTED . Please connect device and try again");
       return;
     }
 
@@ -447,13 +447,13 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       setState(() {
         status = "WAIT SAMPLE";
       });
-      speak("Please insert sample");
+     await speak("Please insert sample");
     }
     else if (res.contains("TEST_STARTED")) {
       setState(() {
         status = "RUNNING";
       });
-      speak("Test started");
+      await speak("Test started");
       startProgress(runningTest);
       // 🔥 ADD THIS (IMPORTANT)
       waitReconnectAndCheckTest(runningTest == "PROTEIN" ? 5 : 100
@@ -468,7 +468,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         isRunning = false;
       });
 
-      speak("Test completed");
+     await speak("Test completed");
 
       completedTests.add(runningTest);
       selectedTests.remove(runningTest);
@@ -482,7 +482,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         isRunning = false;
       });
 
-      speak("Test completed");
+     await speak("Test completed");
 
       completedTests.add(runningTest);
       selectedTests.remove(runningTest);
@@ -493,7 +493,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         status = "ERROR";
         isRunning = false;
       });
-      speak("Error occurred during test");
+     await speak("Error occurred during test");
     }
     else if (res.contains("#RESP:OK:Test not Performed")) {
       setState(() {
@@ -528,13 +528,13 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       switch (state) {
         case "WAIT_BLANK":
           print("🔥 Wait blank");
-          speak("Wait blank sample");
+         await speak("Wait blank sample");
           calibDialogKey!.currentState!.updateStep(0);
           break;
 
         case "BLANK_RUNNING":
           print("🔥 process blank");
-          speak("Processing blank sample");
+          await speak("Processing blank sample");
           calibDialogKey!.currentState!.updateStep(-1);
           // stopCalibPolling(); // 🔥 ADD THIS
 
@@ -545,31 +545,31 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
         case "BLANK_DONE":
           print("🔥 blank Done");
-          speak("Blank Sample Calibration completed.");
+          await speak("Blank Sample Calibration completed.");
           calibDialogKey?.currentState?.updateStep(1);
           break;
         case "WAIT_STD":
           print("🔥 Wait STD");
-          speak("wait standard sample");
+          await speak("wait standard sample");
           calibDialogKey!.currentState!.updateStep(2);
           break;
 
         case "STD_RUNNING":
           print("🔥 RUN stad");
           calibDialogKey?.currentState?.updateStep(2);
-          speak("Processing standard sample");
+          await speak("Processing standard sample");
           // 🔥 WAIT + RECONNECT + CHECK
           waitReconnectAndCheck(15);
           break;
         case "CALIB_DONE":
           print("🔥 Done Calib");
-          speak("Calibration completed");
+          await speak("Calibration completed");
           calibDialogKey!.currentState!.updateStep(3);
           break;
 
         case "ERROR":
           print("🔥 ERrro");
-          speak("Calibration error");
+          await speak("Calibration error");
           break;
       }
     }
@@ -584,12 +584,17 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         isRunning = false;
         isResultShown = true; // 🔥 MUST ADD
       });
-      speak("Test completed successfully");
+      await speak("Test completed successfully");
 
       Map<String, dynamic> parsed = parseResult(res);
 
-      showResultPopup(parsed); // 🔥 POPUP SHOW
+      // showResultPopup(parsed); // 🔥 POPUP SHOW
 
+      if (!mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showResultPopup(parsed);
+      });
       // await disconnectDevice();
       // 🔥 SAVE TO DB HERE
       String pValue = "--";
@@ -638,10 +643,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       if (refValue == "-1.00" || refValue == "-1.000000" || refValue.startsWith("-1")|| refValue == "--") {
         refValue = "NA";
       }
-
+      Future.microtask(() async {
       await _updateResultDB(pValue,sValue,uValue,eValue,rValue,refValue,availableTests);
 
       await _decreaseTestCount();
+      });
       setState(() {
         status = "IDLE";
         progress = 0;
@@ -791,9 +797,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
               });
 
               if (!isMuted) {
-                speak("Sound enabled");
+               await speak("Sound enabled");
               } else {
-                speak("Sound disabled");
+                await speak("Sound disabled");
               }
             }
           },
@@ -1496,7 +1502,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     bool connected = await connectDevice();
 
     if (!connected) {
-      speak("Device not connected");
+      await speak("Device not connected");
       return;
     }
 
@@ -1521,7 +1527,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             runningTest = "";
           });
 
-          speak("Device is ready");
+          await ("Device is ready");
         },
       ),
     );
@@ -1538,7 +1544,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     });
     // UI update
     // calibDialogKey?.currentState?.updateStep(0);
-    speak("Insert blank sample");
+    await speak("Insert blank sample");
 
     // 🔥 Start polling
     // startCalibPolling();
@@ -1568,7 +1574,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         status = "DEVICE NOT CONNECTED";
         isRunning = false;
       });
-      speak("Device not connected");
+     await speak("Device not connected");
       return;
     }
 
@@ -1614,10 +1620,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     await tts.speak(text);
   }
 
-  void showTestConfirmDialog(String cmd) {
+  Future<void> showTestConfirmDialog(String cmd) async {
     String name = getName(cmd);
 
-    speak("Do you want to start $name");
+   await speak("Do you want to start $name");
 
     showDialog(
       context: context,
@@ -1629,17 +1635,17 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         content: Text("Do you want to start $name?"),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              speak("Test cancelled");
+              await speak("Test cancelled");
             },
             child: const Text("No"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
 
-              speak("Starting $name");
+             await speak("Starting $name");
 
               startTest(cmd);
             },
@@ -1650,11 +1656,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     );
   }
 
-  void speakCurrentStatus() {
+  Future<void> speakCurrentStatus() async {
     if (isRunning) {
-      speak("$runningTest test is running. Status is $status");
+      await speak("$runningTest test is running. Status is $status");
     } else {
-      speak("No test is running");
+      await speak("No test is running");
     }
   }
 
