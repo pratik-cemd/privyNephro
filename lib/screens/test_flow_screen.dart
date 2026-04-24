@@ -1217,12 +1217,17 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     return value;
   }
-  void showResultPopup(Map<String, dynamic> data) async {
-    int latestCount = await getAvailableTestCount() -1; // 🔥 fetch latest
+  Future<void> showResultPopup(Map<String, dynamic> data) async {
+    int latestCount = await getAvailableTestCount() - 1;
 
-    showDialog(
+    if (!mounted) return;
+
+    await Future.delayed(Duration(milliseconds: 100));
+
+    await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -1231,8 +1236,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             ? Text(data["error"]!)
             : Column(
           mainAxisSize: MainAxisSize.min,
-          // crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
             _resultRow(Icons.science, "Protein", "P", data),
             _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
@@ -1240,8 +1243,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             _resultRow(Icons.bar_chart, "eGFR", "e", data),
             _resultRow(Icons.balance, "P/C Ratio", "r", data),
             const SizedBox(height: 12),
-
-            // 🔥 NEW LINE
             Text(
               "Available Tests: $latestCount",
               style: TextStyle(
@@ -1253,32 +1254,103 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () async {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MyDevicesPage2(
-                    user: widget.user,
-                  ),
-                ),
-
-              );
-
-              await disconnectDevice();
-
-              setState(() {
-                status = "IDLE";
-                progress = 0;
-                runningTest = "";
-                isResultShown = false;
-              });
+            onPressed: () {
+              Navigator.of(dialogContext).pop(); // 🔥 pehle dialog band
             },
             child: const Text("OK"),
           )
         ],
       ),
     );
+
+    // 🔥 dialog band hone ke baad navigation karo
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MyDevicesPage2(
+          user: widget.user,
+        ),
+      ),
+    );
+
+    await disconnectDevice();
+
+    if (!mounted) return;
+
+    setState(() {
+      status = "IDLE";
+      progress = 0;
+      runningTest = "";
+      isResultShown = false;
+    });
   }
+  // Future<void> showResultPopup(Map<String, dynamic> data) async {
+  //   int latestCount = await getAvailableTestCount() -1; // 🔥 fetch latest
+  //   if (!mounted) return;
+  //
+  //   await Future.delayed(Duration(milliseconds: 100));
+  //
+  //   showDialog(
+  //     context:  Navigator.of(context, rootNavigator: true).context, // 🔥 FIX
+  //     builder: (context) => AlertDialog(
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(20),
+  //       ),
+  //       title: const Text("Test Result"),
+  //       content: data.containsKey("error")
+  //           ? Text(data["error"]!)
+  //           : Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         // crossAxisAlignment: CrossAxisAlignment.start,
+  //
+  //         children: [
+  //           _resultRow(Icons.science, "Protein", "P", data),
+  //           _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+  //           _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+  //           _resultRow(Icons.bar_chart, "eGFR", "e", data),
+  //           _resultRow(Icons.balance, "P/C Ratio", "r", data),
+  //           const SizedBox(height: 12),
+  //
+  //           // 🔥 NEW LINE
+  //           Text(
+  //             "Available Tests: $latestCount",
+  //             style: TextStyle(
+  //               fontWeight: FontWeight.bold,
+  //               color: getTestCountColor(latestCount),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () async {
+  //             Navigator.pushReplacement(
+  //               context,
+  //               MaterialPageRoute(
+  //                 builder: (_) => MyDevicesPage2(
+  //                   user: widget.user,
+  //                 ),
+  //               ),
+  //
+  //             );
+  //
+  //             await disconnectDevice();
+  //
+  //             setState(() {
+  //               status = "IDLE";
+  //               progress = 0;
+  //               runningTest = "";
+  //               isResultShown = false;
+  //             });
+  //           },
+  //           child: const Text("OK"),
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Future<void> disconnectDevice() async {
     try {
@@ -1732,24 +1804,28 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   Future<void> showIOSDebugDialog(String message) async {
     if (!mounted) return;
 
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("iOS Debug"),
-          content: SingleChildScrollView(
-            child: Text(message),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("OK"),
+    Future.delayed(Duration.zero, () {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text("DEBUG"),
+            content: SingleChildScrollView(
+              child: Text(message),
             ),
-          ],
-        );
-      },
-    );
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 }
 class CalibrationDialog extends StatefulWidget {
