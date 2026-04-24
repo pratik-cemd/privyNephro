@@ -554,7 +554,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       showResultPopup(parsed); // 🔥 POPUP SHOW
 
-      await disconnectDevice();
+      // await disconnectDevice();
       // 🔥 SAVE TO DB HERE
       String pValue = "--";
       String sValue = "--";
@@ -566,7 +566,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       String rawP = parsed["P"]["raw"] ?? "";
 
       // final regex = RegExp(r'([\d.]+)\(([\d.]+)\)');
-      final regex = RegExp(r'([A-Za-z0-9.\s]+)\(([-\d.]+)\)');
+      // final regex = RegExp(r'([A-Za-z0-9.\s]+)\(([-\d.]+)\)');
+      final regex = RegExp(r'([-\dA-Za-z0-9.\s]+)\(([-\d.]+)\)');
       // final regex = RegExp(r'([-\d.]+)\(([-\d.]+)\)');
       final match = regex.firstMatch(rawP);
 
@@ -1213,6 +1214,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
                     user: widget.user,
                   ),
                 ),
+
               );
 
               await disconnectDevice();

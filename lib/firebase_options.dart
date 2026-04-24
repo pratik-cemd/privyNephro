@@ -62,12 +62,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDTzPlPvl5Q9Lvf_s9KC-ioaM-wpQGxfEg',
-    appId: '1:150293150539:ios:49589eee308ab2a39b46ce',
+    appId: '1:150293150539:ios:aa7dfdead414dbdb9b46ce',
     messagingSenderId: '150293150539',
     projectId: 'privy-nephro',
     databaseURL: 'https://privy-nephro-default-rtdb.firebaseio.com',
     storageBucket: 'privy-nephro.firebasestorage.app',
-    iosBundleId: 'com.example.privy181125',
+    iosBundleId: 'com.privynephro.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
