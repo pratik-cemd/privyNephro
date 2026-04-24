@@ -34,6 +34,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
   final dbRef = FirebaseDatabase.instance.ref();
   String selectedDeviceId = "";
+  String bleBuffer = "";
 
   BluetoothCharacteristic? writeChar;
   StreamSubscription<List<int>>? notifySub;
@@ -108,7 +109,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     widget.device.disconnect();
     _controller.dispose();
     connectionSub?.cancel();
-    tts.stop();
+    tts.stop(); //voice
     super.dispose();
   }
 
@@ -362,9 +363,30 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             await c.setNotifyValue(true);
 
             notifySub?.cancel();
+            // notifySub = c.onValueReceived.listen((value) {
+            //   String data = String.fromCharCodes(value);
+            //   handleResponse(data);
+            // });
             notifySub = c.onValueReceived.listen((value) {
-              String data = String.fromCharCodes(value);
-              handleResponse(data);
+              String chunk = String.fromCharCodes(value);
+
+              debugPrint("CHUNK: [$chunk]");
+
+              bleBuffer += chunk;
+
+              // 🔥 iOS fix: handle split packets
+              while (bleBuffer.contains("\n")) {
+                int index = bleBuffer.indexOf("\n");
+
+                String fullMessage = bleBuffer.substring(0, index).trim();
+
+                bleBuffer = bleBuffer.substring(index + 1);
+
+                if (fullMessage.isNotEmpty) {
+                  debugPrint("FULL MSG: [$fullMessage]");
+                  handleResponse(fullMessage);
+                }
+              }
             });
           }
         }
@@ -409,6 +431,17 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   // ---------------- RESPONSE ----------------
   Future<void> handleResponse(String res) async {
     debugPrint("ESP: $res");
+
+    res = res.trim().replaceAll("\r", "");
+
+    // 🔥 empty ignore
+    if (res.isEmpty) return;
+
+    // 🔥 duplicate ignore (VERY IMPORTANT)
+    if (res == lastStatus) return;
+    lastStatus = res;
+
+    debugPrint("Device: $res");
 
     if (res.contains("WAIT_SAMPLE")) {
       setState(() {
@@ -542,7 +575,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
 
     // ✅ RESULT HANDLE
-    else if (res.contains("#RESP:OK") && !isResultShown) {
+    // else if (res.startsWith("#RESP:OK") && !isResultShown) {
+    else if ((res.startsWith("#RESP:OK") ||
+        (res.contains("P:") && res.contains("U:")))
+        && !isResultShown){
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
@@ -1070,19 +1106,19 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       ),
     );
   }
+
+
   Future<void> getResultFromDevice() async {
     setState(() {
       status = "GETTING RESULT";
+      isResultShown = false; // 🔥 ADD THIS
     });
 
     await connectDevice();
-
     await sendCommand("#GET:finalResult");
-
-    // Optional: loading feel
   }
 
-  Map<String, dynamic> parseResult(String res) {
+   Map<String, dynamic> parseResult(String res) {
     Map<String, dynamic> result = {};
 
     try {

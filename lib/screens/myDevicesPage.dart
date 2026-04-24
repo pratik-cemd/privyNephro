@@ -14,6 +14,7 @@ import 'myprofile.dart';
 import 'test_count_screen.dart';
 import 'package:intl/intl.dart';
 import 'test_flow_screen.dart';
+import 'package:flutter_tts/flutter_tts.dart';//voice
 
 class MyDevicesPage2 extends StatefulWidget {
   // final String userMobile;
@@ -30,7 +31,9 @@ class MyDevicesPage2 extends StatefulWidget {
 
 class _MyDevicesPageState2 extends State<MyDevicesPage2> {
   final dbRef = FirebaseDatabase.instance.ref();
-
+  FlutterTts tts = FlutterTts();  //voice
+  bool isMuted = false; //voice
+  String selectedLang = "en-IN"; // default voice
   BluetoothDevice? _device;
   BluetoothCharacteristic? _rxChar;
   BluetoothCharacteristic? _txChar;
@@ -70,6 +73,10 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
     _startupValidation(); //ok
     // _loadPendingUpdates();
     _listenToDevices();
+
+    tts.setLanguage("en-IN"); //voice
+    tts.setSpeechRate(0.45); //voice
+    tts.setPitch(1.0); //voice
     // syncPendingResults();
   }
 
@@ -136,7 +143,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
   Color getTestColor(int count) {
     if (count <= 0) {
       return Colors.red;        // ❌ No balance
-    } else if (count < 5) {
+    } else if (count < 6) {
       return Colors.orange;     // ⚠️ Low balance
     } else {
       return Colors.green;      // ✅ Good balance
@@ -324,21 +331,30 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
 
                       onTap: () async {
                         if (!active) {
+                          await speak("Device is not active. Please contact C E M D support");
                           _showPopup("Status", "Please contact CEMD");
                           return;
                         }
                         if (testCount <= 0) {
+                          await speak("No tests remaining. Please recharge");
                           _showPopup("Status", "Please Recharge");
                           return;
                         }
                         // ⚠️ If test count < 5 → show warning
-                        if (testCount < 5) {
+                        if (testCount < 6) {
+                          await speak("Warning Low balance. Only $testCount tests remaining or left.");
                           bool? proceed = await _showConfirmDialogLOW(
                             "Low Balance",
                             testCount,
                           );
 
-                          if (proceed != true) return; // user cancelled
+                          // if (proceed != true) return; // user cancelled
+                          if (proceed != true) {
+                            await speak("Test cancelled");
+                            return;
+                          }
+
+                          await speak("Starting test");
                         }
                             final now = DateTime.now();
                             // Format date → ddMMyy
@@ -655,6 +671,12 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
 
         if (!mounted) return;
 
+        await speak(
+            "Before starting the test, please follow all instructions carefully. "
+                "Make sure the device is charged, not connected to charging, "
+                "cuvette is clean, reagent is available, and sample is prepared properly. "
+                "Do you want to start the test now?"
+        );
         bool? confirmSteps = await _showConfirmDialog(
             "⚠️Pre-Test Preparation"," please confirm:\n\n"
             "•Make sure the device is fully charged and turned on.\n"
@@ -667,7 +689,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         );
 
         if (confirmSteps == true) {
-
+            tts.stop();
           // ✅ Store MAC first
           final device = _device; // ✅ store full object safely
 
@@ -699,35 +721,35 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
 
 
       // ✅ Patient saved response
-      if (rawResult.toLowerCase().contains("patient save")) {
-
-        if (!mounted) return;
-
-        bool? confirmSteps = await _showConfirmDialog(
-          "Instructions",
-          "Before test:\n\n"
-              "• Take cuvette\n"
-              "• Add 3ml urine\n"
-              "• Add 5 drops reagent\n"
-              "• Mix 3 times\n"
-              "• Close cap & clean\n\n"
-              "Have you followed all steps?",
-        );
-
-        // if (confirmSteps == true) {
-        //   setState(() {
-        //     deviceResult[selectedDeviceId] = "Starting test...";
-        //     deviceStage[selectedDeviceId] = 1; // still loading
-        //     testState = TestState.waitingTestStart;
-        //   });
-        //
-        //   await _connectSendAndRead(_device!.remoteId.str, selectedDeviceId, "#startProtineTest");
-        // } else {
-        //   testState = TestState.idle;
-        // }
-
-        return;
-      }
+      // if (rawResult.toLowerCase().contains("patient save")) {
+      //
+      //   if (!mounted) return;
+      //
+      //   bool? confirmSteps = await _showConfirmDialog(
+      //     "Instructions",
+      //     "Before test:\n\n"
+      //         "• Take cuvette\n"
+      //         "• Add 3ml urine\n"
+      //         "• Add 5 drops reagent\n"
+      //         "• Mix 3 times\n"
+      //         "• Close cap & clean\n\n"
+      //         "Have you followed all steps?",
+      //   );
+      //
+      //   // if (confirmSteps == true) {
+      //   //   setState(() {
+      //   //     deviceResult[selectedDeviceId] = "Starting test...";
+      //   //     deviceStage[selectedDeviceId] = 1; // still loading
+      //   //     testState = TestState.waitingTestStart;
+      //   //   });
+      //   //
+      //   //   await _connectSendAndRead(_device!.remoteId.str, selectedDeviceId, "#startProtineTest");
+      //   // } else {
+      //   //   testState = TestState.idle;
+      //   // }
+      //
+      //   return;
+      // }
 
       // if (rawResult.toLowerCase().contains("test start")) {
       //
@@ -1076,8 +1098,17 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
     _deviceListener?.cancel();
     _scanSub?.cancel();
     FlutterBluePlus.stopScan();
+    tts.stop(); //voice
     super.dispose();
   }
+
+  Future<void> speak(String text) async {
+    if (isMuted) return; // 🔥 mute control
+    await tts.stop(); // 🔥 previous voice stop
+    await tts.setLanguage(selectedLang); // 🔥 dynamic language
+    await tts.speak(text);
+  }
+
 
   void _listenToDevices() {
     final devicesRef = dbRef.child("Devices").child(widget.user.mobile);
