@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "150293150539",
+    "firebase_url": "https://privy-nephro-default-rtdb.firebaseio.com",
+    "project_id": "privy-nephro",
+    "storage_bucket": "privy-nephro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150293150539:android:5fe97ab8012f91859b46ce",
+        "android_client_info": {
+          "package_name": "com.example.privy_phone_190326"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtg68dyg6sX5sl8KhfofhOs0nsrDOV6AE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150293150539:android:8b4685a0b05e24bd9b46ce",
+        "android_client_info": {
+          "package_name": "com.privynephro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtg68dyg6sX5sl8KhfofhOs0nsrDOV6AE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

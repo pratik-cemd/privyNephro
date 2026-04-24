@@ -1,0 +1,80 @@
+name: privyNephro_310326
+description: "privy device code shift to flutter"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+
+
+
+
+#dependencies:
+#  firebase_core: ^3.7.0
+#  cloud_firestore: ^5.4.0
+#  firebase_auth: ^5.1.0
+#  flutter:
+#    sdk: flutter
+#  cupertino_icons: ^1.0.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^4.2.1
+  firebase_database: ^12.1.0
+  shared_preferences: ^2.2.3
+  flutter_svg: ^2.2.3 # optional if you use svg icons
+  image_picker: ^1.0.7
+  flutter_blue_plus: ^2.1.1
+  flutter_launcher_icons: ^0.14.4
+  pdf: ^3.10.8
+  printing: ^5.12.0
+  path_provider: ^2.1.2
+  share_plus: ^12.0.1
+  intl: ^0.20.2
+  flutter_image_compress: ^2.3.0
+  flutter_bluetooth_serial:
+    git:
+      url: https://github.com/edufolly/flutter_bluetooth_serial.git
+      ref: master
+#  permission_handler: ^12.0.1
+  flutter_reactive_ble: ^5.0.3
+#  permission_handler: ^11.3.0
+  permission_handler: ^12.0.1
+  flutter_tts: ^3.8.5   #voice command
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/img.png"
+
+flutter_native_splash:
+  android: true
+  ios: true
+  fullscreen: true
+
+  # Background color
+  color: "#0A1227"
+
+  # FASTEST way: use small logo + small background
+  image: assets/images/logo.png      # must be <150 KB
+  background_image: assets/images/home.png   # must be <200 KB
+
+  android_gravity: full
+  ios_content_mode: scaleAspectFill
