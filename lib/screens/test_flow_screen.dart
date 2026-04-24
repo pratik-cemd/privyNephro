@@ -579,6 +579,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     else if ((res.startsWith("#RESP:OK") ||
         (res.contains("P:") && res.contains("U:")))
         && !isResultShown){
+      // 🔥 DEBUG DIALOG (ADD THIS)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showIOSDebugDialog(res);
+      });
+
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
@@ -1722,6 +1727,29 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     } catch (e) {
       print("❌ Write Error: $e");
     }
+  }
+
+  Future<void> showIOSDebugDialog(String message) async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("iOS Debug"),
+          content: SingleChildScrollView(
+            child: Text(message),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 class CalibrationDialog extends StatefulWidget {
