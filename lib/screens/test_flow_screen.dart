@@ -1847,20 +1847,32 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
     if (!mounted) return;
 
+    int latestCount = await getAvailableTestCount() - 1;
+
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
 
-      String message = "";
+      Widget buildRow(IconData icon, String label, String key) {
+        String value = data[key]?["value"] ?? data[key] ?? "--";
 
-      if (data.containsKey("error")) {
-        message = data["error"];
-      } else {
-        message =
-            "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
-            "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
-            "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
-            "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}";
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Icon(icon, size: 20), // 🔥 small + fixed size
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: Text(label),
+              ),
+
+              Text(
+                value,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        );
       }
 
       showDialog(
@@ -1868,9 +1880,40 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: Text("Test Result"),
             content: SingleChildScrollView(
-              child: Text(message),
+              child: data.containsKey("error")
+                  ? Text(data["error"])
+                  : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildRow(Icons.science, "Protein", "P"),
+                  buildRow(Icons.water_drop, "Urine Creatinine", "U"),
+                  buildRow(Icons.biotech, "Serum Creatinine", "S"),
+                  buildRow(Icons.bar_chart, "eGFR", "e"),
+                  buildRow(Icons.balance, "P/C Ratio", "r"),
+
+                  const SizedBox(height: 12),
+                  Divider(),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Available Tests"),
+                      Text(
+                        "$latestCount",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: getTestCountColor(latestCount),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
