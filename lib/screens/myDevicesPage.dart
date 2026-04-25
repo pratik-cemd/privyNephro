@@ -591,21 +591,50 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         } catch (_) {}
       }
       if (Platform.isIOS) {
+        // BluetoothDevice? foundDevice;
+        //         //
+        //         // await FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
+        //         //
+        //         // await for (final results in FlutterBluePlus.scanResults) {
+        //         //   for (final r in results) {
+        //         //     if (r.device.name == deviceName || r.device.advName == deviceName) {
+        //         //       foundDevice = r.device;
+        //         //       break;
+        //         //     }
+        //         //   }
+        //         //   if (foundDevice != null) break;
+        //         // }
+        //         //
+        //         // await FlutterBluePlus.stopScan();
+        //         //
+        //         // if (foundDevice == null) {
+        //         //   throw Exception("Device not found");
+        //         // }
+        //         //
+        //         // _device = foundDevice;
+
         BluetoothDevice? foundDevice;
 
-        await FlutterBluePlus.startScan(timeout: const Duration(seconds: 7));
+        await FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
 
-        await for (final results in FlutterBluePlus.scanResults) {
+        _scanSub?.cancel();
+
+        _scanSub = FlutterBluePlus.scanResults.listen((results) {
           for (final r in results) {
-            if (r.device.name == deviceName || r.device.advName == deviceName) {
+            final name = r.device.platformName.isNotEmpty
+                ? r.device.platformName
+                : r.advertisementData.localName;
+
+            if (name == deviceName) {
               foundDevice = r.device;
               break;
             }
           }
-          if (foundDevice != null) break;
-        }
+        });
 
+        await Future.delayed(const Duration(seconds: 5));
         await FlutterBluePlus.stopScan();
+        await _scanSub?.cancel();
 
         if (foundDevice == null) {
           throw Exception("Device not found");
