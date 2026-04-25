@@ -625,7 +625,8 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
                 ? r.device.platformName
                 : r.advertisementData.localName;
 
-            if (name == deviceName) {
+            // if (name == deviceName) {
+            if (name.contains(deviceName)){
               foundDevice = r.device;
               break;
             }
@@ -650,6 +651,8 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         timeout: const Duration(seconds: 12),
         autoConnect: false,
       );
+      // 🔥 ADD THIS
+      await Future.delayed(const Duration(milliseconds: 200));
       await _discoverServices();
     } catch (e) {
       _showPopup("Connection Error", "Device not found or unreachable.");
@@ -1110,14 +1113,14 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         final deviceId = device["deviceId"];
         final testCount = device["testCount"];
 
-        bool sent = await _sendTestCountToDevice(deviceId, testCount);
-
-        if (sent) {
-          updatedNewTest.removeWhere((d) => d["deviceId"] == deviceId);
-          print("$deviceId synced and removed");
-        } else {
-          print("$deviceId not available");
-        }
+        // bool sent = await _sendTestCountToDevice(deviceId, testCount);
+        //
+        // if (sent) {
+        //   updatedNewTest.removeWhere((d) => d["deviceId"] == deviceId);
+        //   print("$deviceId synced and removed");
+        // } else {
+        //   print("$deviceId not available");
+        // }
       }
     } finally {
       _setLoading(false);
@@ -1228,6 +1231,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
       String formattedCount = testCount.toString().padLeft(3, '0');
       String command = "\$$formattedCount";
 
+
       await _connectToDevice(mac, deviceId);
       await _sendCommand(command);
       print("Sync success → $deviceId : $command");
@@ -1240,48 +1244,48 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
     }
   }
 
-  void _startScanning() {
-    if (_scanSub != null) return;
-
-    FlutterBluePlus.startScan();
-
-    _scanSub = FlutterBluePlus.scanResults.listen((List<ScanResult> results) {
-      for (ScanResult result in results) {
-        String name = result.device.platformName;
-        if (name == '') name = result.advertisementData.localName ?? '';
-        if (!name.startsWith('SCINPY')) continue;
-
-        final index = updatedNewTest.indexWhere((d) => d['deviceId'] == name);
-        if (index == -1) continue;
-        if (_syncingDevices.contains(name)) continue;
-
-        final last = _lastSyncAttempt[name];
-        if (last != null &&DateTime.now().difference(last) < const Duration(seconds: 30)) continue;
-
-        _lastSyncAttempt[name] = DateTime.now();
-        _syncingDevices.add(name);
-
-        final count = updatedNewTest[index]['testCount'] as int;
-
-        _sendTestCountToDevice(name, count).then((bool success) {
-          _syncingDevices.remove(name);
-          if (success) {
-            updatedNewTest.removeAt(index);
-            _showPopup("Sync Success", "Test count updated for $name");
-            if (updatedNewTest.isEmpty) {
-              _stopScanning();
-            }
-          }
-        });
-      }
-    });
-  }
-
-  void _stopScanning() {
-    _scanSub?.cancel();
-    _scanSub = null;
-    FlutterBluePlus.stopScan();
-  }
+  // void _startScanning() {
+  //   if (_scanSub != null) return;
+  //
+  //   FlutterBluePlus.startScan();
+  //
+  //   _scanSub = FlutterBluePlus.scanResults.listen((List<ScanResult> results) {
+  //     for (ScanResult result in results) {
+  //       String name = result.device.platformName;
+  //       if (name == '') name = result.advertisementData.localName ?? '';
+  //       if (!name.startsWith('SCINPY')) continue;
+  //
+  //       final index = updatedNewTest.indexWhere((d) => d['deviceId'] == name);
+  //       if (index == -1) continue;
+  //       if (_syncingDevices.contains(name)) continue;
+  //
+  //       final last = _lastSyncAttempt[name];
+  //       if (last != null &&DateTime.now().difference(last) < const Duration(seconds: 30)) continue;
+  //
+  //       _lastSyncAttempt[name] = DateTime.now();
+  //       _syncingDevices.add(name);
+  //
+  //       final count = updatedNewTest[index]['testCount'] as int;
+  //
+  //       _sendTestCountToDevice(name, count).then((bool success) {
+  //         _syncingDevices.remove(name);
+  //         if (success) {
+  //           updatedNewTest.removeAt(index);
+  //           _showPopup("Sync Success", "Test count updated for $name");
+  //           if (updatedNewTest.isEmpty) {
+  //             _stopScanning();
+  //           }
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
+  //
+  // void _stopScanning() {
+  //   _scanSub?.cancel();
+  //   _scanSub = null;
+  //   FlutterBluePlus.stopScan();
+  // }
 
   // Future<bool?> _showConfirmDialog(String title, String message) {
   //   return showDialog<bool>(
