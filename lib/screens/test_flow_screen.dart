@@ -1221,75 +1221,140 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     return value;
   }
+
+
+  // Future<void> showResultPopup(Map<String, dynamic> data) async {
+  //   int latestCount = await getAvailableTestCount() - 1;
+  //
+  //   if (!mounted) return;
+  //
+  //   await Future.delayed(Duration(milliseconds: 100));
+  //
+  //   await showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (dialogContext) => AlertDialog(
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(20),
+  //       ),
+  //       title: const Text("Test Result"),
+  //       content: data.containsKey("error")
+  //           ? Text(data["error"]!)
+  //           : Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           _resultRow(Icons.science, "Protein", "P", data),
+  //           _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+  //           _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+  //           _resultRow(Icons.bar_chart, "eGFR", "e", data),
+  //           _resultRow(Icons.balance, "P/C Ratio", "r", data),
+  //           const SizedBox(height: 12),
+  //           Text(
+  //             "Available Tests: $latestCount",
+  //             style: TextStyle(
+  //               fontWeight: FontWeight.bold,
+  //               color: getTestCountColor(latestCount),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.of(dialogContext).pop(); // 🔥 pehle dialog band
+  //           },
+  //           child: const Text("OK"),
+  //         )
+  //       ],
+  //     ),
+  //   );
+  //
+  //   // 🔥 dialog band hone ke baad navigation karo
+  //   if (!mounted) return;
+  //
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => MyDevicesPage2(
+  //         user: widget.user,
+  //       ),
+  //     ),
+  //   );
+  //
+  //   await disconnectDevice();
+  //
+  //   // if (!mounted) return;
+  //   //
+  //   // setState(() {
+  //   //   status = "IDLE";
+  //   //   progress = 0;
+  //   //   runningTest = "";
+  //   //   isResultShown = false;
+  //   // });
+  // }
+
   Future<void> showResultPopup(Map<String, dynamic> data) async {
+    if (!mounted) return;
+
     int latestCount = await getAvailableTestCount() - 1;
 
-    if (!mounted) return;
+    // 🔥 iOS SAFE CALL (IMPORTANT)
+    Future.delayed(Duration.zero, () async {
+      if (!mounted) return;
 
-    await Future.delayed(Duration(milliseconds: 100));
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text("Test Result"),
-        content: data.containsKey("error")
-            ? Text(data["error"]!)
-            : Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _resultRow(Icons.science, "Protein", "P", data),
-            _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
-            _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
-            _resultRow(Icons.bar_chart, "eGFR", "e", data),
-            _resultRow(Icons.balance, "P/C Ratio", "r", data),
-            const SizedBox(height: 12),
-            Text(
-              "Available Tests: $latestCount",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: getTestCountColor(latestCount),
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text("Test Result"),
+          content: data.containsKey("error")
+              ? Text(data["error"]!)
+              : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _resultRow(Icons.science, "Protein", "P", data),
+              _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+              _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+              _resultRow(Icons.bar_chart, "eGFR", "e", data),
+              _resultRow(Icons.balance, "P/C Ratio", "r", data),
+              const SizedBox(height: 12),
+              Text(
+                "Available Tests: $latestCount",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: getTestCountColor(latestCount),
+                ),
               ),
-            ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text("OK"),
+            )
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(); // 🔥 pehle dialog band
-            },
-            child: const Text("OK"),
-          )
-        ],
-      ),
-    );
+      );
 
-    // 🔥 dialog band hone ke baad navigation karo
-    if (!mounted) return;
+      // 🔥 AFTER CLOSE
+      if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MyDevicesPage2(
-          user: widget.user,
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MyDevicesPage2(user: widget.user),
         ),
-      ),
-    );
+      );
 
-    await disconnectDevice();
-
-    // if (!mounted) return;
-    //
-    // setState(() {
-    //   status = "IDLE";
-    //   progress = 0;
-    //   runningTest = "";
-    //   isResultShown = false;
-    // });
+      await disconnectDevice();
+    });
   }
+
   // Future<void> showResultPopup(Map<String, dynamic> data) async {
   //   int latestCount = await getAvailableTestCount() -1; // 🔥 fetch latest
   //   if (!mounted) return;
