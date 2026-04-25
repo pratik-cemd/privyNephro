@@ -1847,41 +1847,30 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
     if (!mounted) return;
 
-    int latestCount = await getAvailableTestCount() - 1;
-
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
+
+      String message = "";
+
+      if (data.containsKey("error")) {
+        message = data["error"];
+      } else {
+        message =
+            "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+            "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
+            "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
+            "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
+            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}";
+      }
 
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: const Text("Test Result"),
+            title: Text("Test Result"),
             content: SingleChildScrollView(
-              child: data.containsKey("error")
-                  ? Text(data["error"]!)
-                  : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _resultRow(Icons.science, "Protein", "P", data),
-                  _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
-                  _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
-                  _resultRow(Icons.bar_chart, "eGFR", "e", data),
-                  _resultRow(Icons.balance, "P/C Ratio", "r", data),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Available Tests: $latestCount",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: getTestCountColor(latestCount),
-                    ),
-                  ),
-                ],
-              ),
+              child: Text(message),
             ),
             actions: [
               TextButton(
@@ -1899,8 +1888,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
                   await disconnectDevice();
                 },
-                child: const Text("OK"),
-              )
+                child: Text("OK"),
+              ),
             ],
           );
         },
