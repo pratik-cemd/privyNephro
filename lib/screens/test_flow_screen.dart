@@ -1862,7 +1862,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR            : ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
             "P/C Ratio       : ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n";
-            "\nAvailable Tests : $latestCount";
+            // "\nAvailable Tests : $latestCount";
       }
 
       showDialog(
