@@ -1849,95 +1849,20 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     int latestCount = await getAvailableTestCount() - 1;
 
-    Future.delayed(Duration.zero, () {
+    Future.delayed(Duration(milliseconds: 200), () {
       if (!mounted) return;
 
-      Widget buildRow(String label, String key) {
-        String value = data[key]?["value"] ?? data[key] ?? "--";
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
       showDialog(
-        context: context,
+        context: Navigator.of(context, rootNavigator: true).context, // 🔥 FIX
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Center(
-              child: Text(
-                "Test Result",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: data.containsKey("error")
-                  ? Text(data["error"])
-                  : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  buildRow("Protein", "P"),
-                  Divider(),
-                  buildRow("Urine Creatinine", "U"),
-                  Divider(),
-                  buildRow("Serum Creatinine", "S"),
-                  Divider(),
-                  buildRow("eGFR", "e"),
-                  Divider(),
-                  buildRow("P/C Ratio", "r"),
-
-                  const SizedBox(height: 12),
-
-                  Divider(thickness: 1.5),
-
-                  const SizedBox(height: 8),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Available Tests",
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        "$latestCount",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: getTestCountColor(latestCount),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            title: Text("Test Result"),
+            content: Text("Protein: ${data["P"] ?? "--"}"),
             actions: [
               TextButton(
                 onPressed: () async {
                   Navigator.of(ctx).pop();
-
-                  if (!mounted) return;
 
                   Navigator.pushReplacement(
                     context,
