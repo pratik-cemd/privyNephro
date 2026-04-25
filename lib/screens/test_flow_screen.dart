@@ -1852,23 +1852,25 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
 
-      Widget buildRow(String icon, String label, String key) {
+      Widget buildRow(String label, String key) {
         String value = data[key]?["value"] ?? data[key] ?? "--";
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              Text(icon, style: TextStyle(fontSize: 16)), // 🔥 emoji instead of Icon
-              const SizedBox(width: 10),
-
               Expanded(
-                child: Text(label),
+                child: Text(
+                  label,
+                  style: TextStyle(fontSize: 14),
+                ),
               ),
-
               Text(
                 value,
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -1883,26 +1885,41 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: Text("Test Result"),
+            title: Center(
+              child: Text(
+                "Test Result",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             content: SingleChildScrollView(
               child: data.containsKey("error")
                   ? Text(data["error"])
                   : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  buildRow("🧪", "Protein", "P"),
-                  buildRow("💧", "Urine Creatinine", "U"),
-                  buildRow("🧬", "Serum Creatinine", "S"),
-                  buildRow("📊", "eGFR", "e"),
-                  buildRow("⚖️", "P/C Ratio", "r"),
+                  buildRow("Protein", "P"),
+                  Divider(),
+                  buildRow("Urine Creatinine", "U"),
+                  Divider(),
+                  buildRow("Serum Creatinine", "S"),
+                  Divider(),
+                  buildRow("eGFR", "e"),
+                  Divider(),
+                  buildRow("P/C Ratio", "r"),
 
                   const SizedBox(height: 12),
-                  Divider(),
+
+                  Divider(thickness: 1.5),
+
+                  const SizedBox(height: 8),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Available Tests"),
+                      Text(
+                        "Available Tests",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
                       Text(
                         "$latestCount",
                         style: TextStyle(
