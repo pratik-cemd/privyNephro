@@ -580,9 +580,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         (res.contains("P:") && res.contains("U:")))
         && !isResultShown){
       // 🔥 DEBUG DIALOG (ADD THIS)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showIOSDebugDialog(res);
-      });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   showIOSDebugDialog(res);
+      // });
 
       setState(() {
         status = "RESULT RECEIVED";
