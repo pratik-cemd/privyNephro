@@ -1857,12 +1857,12 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         message = data["error"];
       } else {
         message =
-            "Protein         : ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+            "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
             "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
-            "eGFR            : ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-            "P/C Ratio       : ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n";
-            // "\nAvailable Tests : $latestCount";
+            "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
+            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n";
+            "\nAvailable Tests : ";
       }
 
       showDialog(
