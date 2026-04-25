@@ -1897,181 +1897,74 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   //   });
   // }
 
-  // Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-  //
-  //   int latestCount = await getAvailableTestCount() - 1;
-  //
-  //   if (!mounted) return;
-  //
-  //   Future.delayed(Duration.zero, () {
-  //     if (!mounted) return;
-  //
-  //     String format(String label, dynamic value) {
-  //       return "$label : ${value ?? "--"}";
-  //     }
-  //
-  //     String message = "";
-  //
-  //     if (data.containsKey("error")) {
-  //       message = data["error"];
-  //     } else {
-  //       message =
-  //       "${format("Protein", data["P"]?["value"] ?? data["P"])}\n\n"
-  //           "${format("Urine Creatinine", data["U"]?["value"] ?? data["U"])}\n\n"
-  //           "${format("Serum Creatinine", data["S"]?["value"] ?? data["S"])}\n\n"
-  //           "${format("eGFR", data["e"]?["value"] ?? data["e"])}\n\n"
-  //           "${format("P/C Ratio", data["r"]?["value"] ?? data["r"])}\n\n";
-  //           "----------------------\n"
-  //           "Available Tests : $latestCount";
-  //     }
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           title: Text("Test Result"),
-  //           content: SingleChildScrollView(
-  //             child: Text(
-  //               message,
-  //               style: TextStyle(
-  //                 height: 1.5, // 🔥 spacing improve
-  //                 fontSize: 14,
-  //               ),
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 Navigator.of(ctx).pop();
-  //
-  //                 if (!mounted) return;
-  //
-  //                 Navigator.pushReplacement(
-  //                   context,
-  //                   MaterialPageRoute(
-  //                     builder: (_) => MyDevicesPage2(user: widget.user),
-  //                   ),
-  //                 );
-  //
-  //                 await disconnectDevice();
-  //               },
-  //               child: Text("OK"),
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-    if (!mounted) return;
 
     int latestCount = await getAvailableTestCount() - 1;
+
+    if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
 
-      String getVal(key) => "${data[key]?["value"] ?? data[key] ?? "--"}";
+      String format(String label, dynamic value) {
+        return "$label : ${value ?? "--"}";
+      }
+
+      String message = "";
+
+      if (data.containsKey("error")) {
+        message = data["error"];
+      } else {
+        message =
+            "${format("Protein", data["P"]?["value"] ?? data["P"])}\n\n"
+            "${format("Urine Creatinine", data["U"]?["value"] ?? data["U"])}\n\n"
+            "${format("Serum Creatinine", data["S"]?["value"] ?? data["S"])}\n\n"
+            "${format("eGFR", data["e"]?["value"] ?? data["e"])}\n\n"
+            "${format("P/C Ratio", data["r"]?["value"] ?? data["r"])}\n\n";
+            // "----------------------\n"
+            "\nAvailable Tests : $latestCount";
+      }
 
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Center(
-              child: Text(
-                "Test Result",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+            title: Text("Test Result"),
             content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-
-                  // 🔹 Result Box
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        _simpleRow("Protein", getVal("P")),
-                        _simpleRow("Urine Creatinine", getVal("U")),
-                        _simpleRow("Serum Creatinine", getVal("S")),
-                        _simpleRow("eGFR", getVal("e")),
-                        _simpleRow("P/C Ratio", getVal("r")),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 12),
-
-                  // 🔹 Available Tests Box
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      "Available Tests: $latestCount",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                message,
+                style: TextStyle(
+                  height: 1.5, // 🔥 spacing improve
+                  fontSize: 14,
+                ),
               ),
             ),
             actions: [
-              Center(
-                child: TextButton(
-                  onPressed: () async {
-                    Navigator.of(ctx).pop();
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
 
-                    if (!mounted) return;
+                  if (!mounted) return;
 
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MyDevicesPage2(user: widget.user),
-                      ),
-                    );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyDevicesPage2(user: widget.user),
+                    ),
+                  );
 
-                    await disconnectDevice();
-                  },
-                  child: Text("OK"),
-                ),
-              )
+                  await disconnectDevice();
+                },
+                child: Text("OK"),
+              ),
             ],
           );
         },
       );
     });
   }
-  Widget _simpleRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(
-            value,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 class CalibrationDialog extends StatefulWidget {
   // final Function(String) sendCommand;
