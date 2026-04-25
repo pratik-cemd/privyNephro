@@ -1844,71 +1844,12 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
   }
 
-  // Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-  //   if (!mounted) return;
-  //
-  //   Future.delayed(Duration.zero, () {
-  //     if (!mounted) return;
-  //
-  //     String message = "";
-  //
-  //     if (data.containsKey("error")) {
-  //       message = data["error"];
-  //     } else {
-  //       message =
-  //       "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
-  //           "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
-  //           "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
-  //           "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-  //           "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}";
-  //     }
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           title: Text("Test Result"),
-  //           content: SingleChildScrollView(
-  //             child: Text(message),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 Navigator.of(ctx).pop();
-  //
-  //                 if (!mounted) return;
-  //
-  //                 Navigator.pushReplacement(
-  //                   context,
-  //                   MaterialPageRoute(
-  //                     builder: (_) => MyDevicesPage2(user: widget.user),
-  //                   ),
-  //                 );
-  //
-  //                 await disconnectDevice();
-  //               },
-  //               child: Text("OK"),
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
-
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-
     int latestCount = await getAvailableTestCount() - 1;
-
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
-
-      String format(String label, dynamic value) {
-        return "$label : ${value ?? "--"}";
-      }
 
       String message = "";
 
@@ -1916,12 +1857,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         message = data["error"];
       } else {
         message =
-            "${format("Protein", data["P"]?["value"] ?? data["P"])}\n\n"
-            "${format("Urine Creatinine", data["U"]?["value"] ?? data["U"])}\n\n"
-            "${format("Serum Creatinine", data["S"]?["value"] ?? data["S"])}\n\n"
-            "${format("eGFR", data["e"]?["value"] ?? data["e"])}\n\n"
-            "${format("P/C Ratio", data["r"]?["value"] ?? data["r"])}\n\n";
-            // "----------------------\n"
+            "Protein         : ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+            "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
+            "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
+            "eGFR            : ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
+            "P/C Ratio       : ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n";
             "\nAvailable Tests : $latestCount";
       }
 
@@ -1932,13 +1872,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
           return AlertDialog(
             title: Text("Test Result"),
             content: SingleChildScrollView(
-              child: Text(
-                message,
-                style: TextStyle(
-                  height: 1.5, // 🔥 spacing improve
-                  fontSize: 14,
-                ),
-              ),
+              child: Text(message),
             ),
             actions: [
               TextButton(
@@ -1964,6 +1898,74 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       );
     });
   }
+
+  // Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
+  //
+  //   int latestCount = await getAvailableTestCount() - 1;
+  //
+  //   if (!mounted) return;
+  //
+  //   Future.delayed(Duration.zero, () {
+  //     if (!mounted) return;
+  //
+  //     String format(String label, dynamic value) {
+  //       return "$label : ${value ?? "--"}";
+  //     }
+  //
+  //     String message = "";
+  //
+  //     if (data.containsKey("error")) {
+  //       message = data["error"];
+  //     } else {
+  //       message =
+  //           "${format("Protein", data["P"]?["value"] ?? data["P"])}\n\n"
+  //           "${format("Urine Creatinine", data["U"]?["value"] ?? data["U"])}\n\n"
+  //           "${format("Serum Creatinine", data["S"]?["value"] ?? data["S"])}\n\n"
+  //           "${format("eGFR", data["e"]?["value"] ?? data["e"])}\n\n"
+  //           "${format("P/C Ratio", data["r"]?["value"] ?? data["r"])}\n\n";
+  //           // "----------------------\n"
+  //           "\nAvailable Tests : $latestCount";
+  //     }
+  //
+  //     showDialog(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder: (ctx) {
+  //         return AlertDialog(
+  //           title: Text("Test Result"),
+  //           content: SingleChildScrollView(
+  //             child: Text(
+  //               message,
+  //               style: TextStyle(
+  //                 height: 1.5, // 🔥 spacing improve
+  //                 fontSize: 14,
+  //               ),
+  //             ),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () async {
+  //                 Navigator.of(ctx).pop();
+  //
+  //                 if (!mounted) return;
+  //
+  //                 Navigator.pushReplacement(
+  //                   context,
+  //                   MaterialPageRoute(
+  //                     builder: (_) => MyDevicesPage2(user: widget.user),
+  //                   ),
+  //                 );
+  //
+  //                 await disconnectDevice();
+  //               },
+  //               child: Text("OK"),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   });
+  // }
 
 }
 class CalibrationDialog extends StatefulWidget {

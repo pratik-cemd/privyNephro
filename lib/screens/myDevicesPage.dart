@@ -554,10 +554,12 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
 
     _busy = true;
     _setLoading(true);
+
     selectedDeviceId = deviceName;
     _rxBuffer = "";
 
     try {
+      await _disconnectClean(); // 🔥 fix
       await _connectToDevice(mac, deviceName);
       // await _discoverServices();
       await _sendCommand(cmd);
@@ -880,6 +882,10 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
 
       if (_device != null) {
         await _device!.disconnect();
+        // 🔥 WAIT until actually disconnected
+        await _device!.connectionState
+            .where((state) => state == BluetoothConnectionState.disconnected)
+            .first;
         await Future.delayed(const Duration(milliseconds: 300));
       }
     } catch (_) {}
