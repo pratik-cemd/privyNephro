@@ -1808,32 +1808,32 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
   }
 
-  Future<void> showIOSDebugDialog(String message) async {
-    if (!mounted) return;
-
-    Future.delayed(Duration.zero, () {
-      if (!mounted) return;
-
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (ctx) {
-          return AlertDialog(
-            title: Text("DEBUG"),
-            content: SingleChildScrollView(
-              child: Text(message),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text("OK"),
-              ),
-            ],
-          );
-        },
-      );
-    });
-  }
+  // Future<void> showIOSDebugDialog(String message) async {
+  //   if (!mounted) return;
+  //
+  //   Future.delayed(Duration.zero, () {
+  //     if (!mounted) return;
+  //
+  //     showDialog(
+  //       context: context,
+  //       barrierDismissible: true,
+  //       builder: (ctx) {
+  //         return AlertDialog(
+  //           title: Text("DEBUG"),
+  //           content: SingleChildScrollView(
+  //             child: Text(message),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.of(ctx).pop(),
+  //               child: Text("OK"),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   });
+  // }
 
 
   Future<void> showResultPopup_2(Map<String, dynamic> data) async {
@@ -1845,7 +1845,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-    int latestCount = await getAvailableTestCount() - 1;
+    int latestCount = await getAvailableTestCount();
+
+    // 🔥 Firebase update ke baad hi -1 karo
+    int displayCount = latestCount - 1;
+
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1861,7 +1865,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n";
+            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
+            // 🔥 NEW LINE (Available Test)
+                "Available Tests: $displayCount";
             }
 
       showDialog(
