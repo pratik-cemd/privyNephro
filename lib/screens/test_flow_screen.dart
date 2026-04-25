@@ -1847,22 +1847,37 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
     if (!mounted) return;
 
-    int latestCount = await getAvailableTestCount() - 1;
-
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(Duration.zero, () {
       if (!mounted) return;
 
+      String message = "";
+
+      if (data.containsKey("error")) {
+        message = data["error"];
+      } else {
+        message =
+        "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+            "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
+            "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
+            "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
+            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}";
+      }
+
       showDialog(
-        context: Navigator.of(context, rootNavigator: true).context, // 🔥 FIX
+        context: context,
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
             title: Text("Test Result"),
-            content: Text("Protein: ${data["P"] ?? "--"}"),
+            content: SingleChildScrollView(
+              child: Text(message),
+            ),
             actions: [
               TextButton(
                 onPressed: () async {
                   Navigator.of(ctx).pop();
+
+                  if (!mounted) return;
 
                   Navigator.pushReplacement(
                     context,
