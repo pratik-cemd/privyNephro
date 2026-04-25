@@ -69,6 +69,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
   @override
   void initState() {
     super.initState();
+    _warmupBluetooth(); // 🔥 ADD THIS
     _initPermissions(); //ok
     _startupValidation(); //ok
     // _loadPendingUpdates();
@@ -576,14 +577,24 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
   Future<void> _connectToDevice(String mac, String deviceName) async {
     if (_isConnecting) return;
     _isConnecting = true;
-
+    await FlutterBluePlus.stopScan();
     try {
-      final state = await FlutterBluePlus.adapterState.first;
-      if (state != BluetoothAdapterState.on) {
-        _showPopup("Bluetooth Off", "Please turn on Bluetooth.");
-        return;
-      }
+      // final state = await FlutterBluePlus.adapterState.first;
+      // if (state != BluetoothAdapterState.on) {
+      //   _showPopup("Bluetooth Off", "Please turn on Bluetooth.");
+      //   return;
+      // }
 
+      final state = await FlutterBluePlus.adapterState
+          .where((s) => s == BluetoothAdapterState.on)
+          .first
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        throw Exception("Bluetooth not ready");
+      });
+      if (state != BluetoothAdapterState.on) {
+          _showPopup("Bluetooth Off", "Please turn on Bluetooth.");
+          return;
+        }
       if (_device != null) {
         try {
           await _device!.disconnect();
@@ -626,7 +637,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
                 : r.advertisementData.localName;
 
             // if (name == deviceName) {
-            if (name.contains(deviceName)){
+            if (name.isNotEmpty && name.contains(deviceName)){
               foundDevice = r.device;
               break;
             }
@@ -646,11 +657,27 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         _device = BluetoothDevice.fromId(mac);
       }
 
-      await _device!.connect(
-        license: License.commercial,
-        timeout: const Duration(seconds: 12),
-        autoConnect: false,
-      );
+      // await _device!.connect(
+      //   license: License.commercial,
+      //   timeout: const Duration(seconds: 12),
+      //   autoConnect: false,
+      // );
+      try {
+        await _device!.connect(
+          license: License.commercial,
+          timeout: const Duration(seconds: 12),
+          autoConnect: false,
+        );
+      } catch (e) {
+        print("Retry connect...");
+        await Future.delayed(const Duration(seconds: 1));
+
+        await _device!.connect(
+          license: License.commercial,
+          timeout: const Duration(seconds: 12),
+          autoConnect: false,
+        );
+      }
       // 🔥 ADD THIS
       await Future.delayed(const Duration(milliseconds: 200));
       await _discoverServices();
@@ -1463,5 +1490,12 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
         );
       },
     );
+  }
+
+  Future<void> _warmupBluetooth() async {
+    try {
+      await FlutterBluePlus.adapterState.first;
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (_) {}
   }
 }
