@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -592,16 +593,16 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       Map<String, dynamic> parsed = parseResult(res);
 
       // 🔥 DEBUG DIALOG (ADD THIS)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showIOSDebugDialog(res);
-      });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   showIOSDebugDialog(res);
+      // });
       // showResultPopup(parsed); // 🔥 POPUP SHOW
 
       if (!mounted) return;
 
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
-        showResultPopup(parsed);
+        showResultPopup_2(parsed);
       });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   showResultPopup(parsed);
@@ -1827,6 +1828,79 @@ class _TestFlowScreenState extends State<TestFlowScreen>
                 onPressed: () => Navigator.of(ctx).pop(),
                 child: Text("OK"),
               ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+
+  Future<void> showResultPopup_2(Map<String, dynamic> data) async {
+    if (Platform.isIOS) {
+      return showIOSResultDialog(data);
+    } else {
+      return showResultPopup(data);
+    }
+  }
+
+  Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
+    if (!mounted) return;
+
+    int latestCount = await getAvailableTestCount() - 1;
+
+    Future.delayed(Duration.zero, () {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text("Test Result"),
+            content: SingleChildScrollView(
+              child: data.containsKey("error")
+                  ? Text(data["error"]!)
+                  : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _resultRow(Icons.science, "Protein", "P", data),
+                  _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+                  _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+                  _resultRow(Icons.bar_chart, "eGFR", "e", data),
+                  _resultRow(Icons.balance, "P/C Ratio", "r", data),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Available Tests: $latestCount",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: getTestCountColor(latestCount),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+
+                  if (!mounted) return;
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyDevicesPage2(user: widget.user),
+                    ),
+                  );
+
+                  await disconnectDevice();
+                },
+                child: const Text("OK"),
+              )
             ],
           );
         },
