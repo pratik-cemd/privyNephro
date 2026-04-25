@@ -597,9 +597,13 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       if (!mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration.zero, () {
+        if (!mounted) return;
         showResultPopup(parsed);
       });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   showResultPopup(parsed);
+      // });
       // await disconnectDevice();
       // 🔥 SAVE TO DB HERE
       String pValue = "--";
@@ -1277,14 +1281,14 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     await disconnectDevice();
 
-    if (!mounted) return;
-
-    setState(() {
-      status = "IDLE";
-      progress = 0;
-      runningTest = "";
-      isResultShown = false;
-    });
+    // if (!mounted) return;
+    //
+    // setState(() {
+    //   status = "IDLE";
+    //   progress = 0;
+    //   runningTest = "";
+    //   isResultShown = false;
+    // });
   }
   // Future<void> showResultPopup(Map<String, dynamic> data) async {
   //   int latestCount = await getAvailableTestCount() -1; // 🔥 fetch latest
