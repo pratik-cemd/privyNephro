@@ -1845,7 +1845,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-
+    int latestCount = await getAvailableTestCount() - 1;
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1862,6 +1862,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
             "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n";
+            "Available Tests: $latestCount \n";
       }
 
       showDialog(
