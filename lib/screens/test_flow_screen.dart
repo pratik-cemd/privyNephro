@@ -1852,14 +1852,14 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     Future.delayed(Duration.zero, () {
       if (!mounted) return;
 
-      Widget buildRow(IconData icon, String label, String key) {
+      Widget buildRow(String icon, String label, String key) {
         String value = data[key]?["value"] ?? data[key] ?? "--";
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              Icon(icon, size: 20), // 🔥 small + fixed size
+              Text(icon, style: TextStyle(fontSize: 16)), // 🔥 emoji instead of Icon
               const SizedBox(width: 10),
 
               Expanded(
@@ -1890,11 +1890,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
                   : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  buildRow(Icons.science, "Protein", "P"),
-                  buildRow(Icons.water_drop, "Urine Creatinine", "U"),
-                  buildRow(Icons.biotech, "Serum Creatinine", "S"),
-                  buildRow(Icons.bar_chart, "eGFR", "e"),
-                  buildRow(Icons.balance, "P/C Ratio", "r"),
+                  buildRow("🧪", "Protein", "P"),
+                  buildRow("💧", "Urine Creatinine", "U"),
+                  buildRow("🧬", "Serum Creatinine", "S"),
+                  buildRow("📊", "eGFR", "e"),
+                  buildRow("⚖️", "P/C Ratio", "r"),
 
                   const SizedBox(height: 12),
                   Divider(),
