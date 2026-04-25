@@ -77,7 +77,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
   bool isReconnecting = false;      // optional
 
-
+  Map<String, dynamic>? pendingResult; //ios
   @override
   void initState() {
     super.initState();
@@ -438,7 +438,13 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     if (res.isEmpty) return;
 
     // 🔥 duplicate ignore (VERY IMPORTANT)
-    if (res == lastStatus) return;
+    // if (res == lastStatus) return;
+    if (res == lastStatus &&
+        !res.contains("DONE") &&
+        !res.startsWith("#RESP:OK")) {
+      return;
+    }
+
     lastStatus = res;
 
     debugPrint("Device: $res");
@@ -459,34 +465,35 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       waitReconnectAndCheckTest(runningTest == "PROTEIN" ? 5 : 100
       );
     }
-    else if (res.contains("TST:DONE")) {
+    else if (res.contains("TEST_DONE") || res.contains("TST:DONE")) {
       print("🔥 new  Test Done from device");
 
       setState(() {
         status = "DONE";
         progress = 1.0; // 🔥 FINAL COMPLETE
         isRunning = false;
+        completedTests.add(runningTest);
+        selectedTests.remove(runningTest);
       });
 
      await speak("Test completed");
 
-      completedTests.add(runningTest);
-      selectedTests.remove(runningTest);
+
     }
-    else if (res.contains("TEST_DONE")) {
-      print("🔥 Test Done from device");
-
-      setState(() {
-        status = "DONE";
-        progress = 1.0;
-        isRunning = false;
-      });
-
-     await speak("Test completed");
-
-      completedTests.add(runningTest);
-      selectedTests.remove(runningTest);
-    }
+    // else if (res.contains("TEST_DONE")) {
+    //   print("🔥 Test Done from device");
+    //
+    //   setState(() {
+    //     status = "DONE";
+    //     progress = 1.0;
+    //     isRunning = false;
+    //   });
+    //
+    //  await speak("Test completed");
+    //
+    //   completedTests.add(runningTest);
+    //   selectedTests.remove(runningTest);
+    // }
 
     else if (res.contains("ERR")) {
       setState(() {
@@ -594,12 +601,22 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       Map<String, dynamic> parsed = parseResult(res);
 
       // showResultPopup(parsed); // 🔥 POPUP SHOW
+      if (isResultShown) return;
+      isResultShown = true;
 
       if (!mounted) return;
 
-      Future.delayed(Duration.zero, () {
+
+      pendingResult = parsed;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        showResultPopup(parsed);
+
+        if (pendingResult != null) {
+          print("🔥 RESULT READY: $parsed");
+          showResultPopup(pendingResult!);
+          pendingResult = null; // 🔥 important
+        }
       });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   showResultPopup(parsed);
@@ -2136,7 +2153,3 @@ class _CalibrationDialogState extends State<CalibrationDialog>
   }
 
 }
-
-
-
-
