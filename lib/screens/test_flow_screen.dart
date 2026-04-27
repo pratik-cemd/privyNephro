@@ -602,7 +602,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
-        showResultPopup_2(parsed);
+        showResultPopup_2(parsed,availableTests);
       });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   showResultPopup(parsed);
@@ -655,11 +655,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       if (refValue == "-1.00" || refValue == "-1.000000" || refValue.startsWith("-1")|| refValue == "--") {
         refValue = "NA";
       }
-      Future.microtask(() async {
+      // Future.microtask(() async {
       await _updateResultDB(pValue,sValue,uValue,eValue,rValue,refValue,availableTests);
 
       await _decreaseTestCount();
-      });
+      // });
       setState(() {
         status = "IDLE";
         progress = 0;
@@ -1863,9 +1863,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   // }
 
 
-  Future<void> showResultPopup_2(Map<String, dynamic> data) async {
+  Future<void> showResultPopup_2(Map<String, dynamic> data,int latestCount) async {
     if (Platform.isIOS) {
-      final latestCount = await getAvailableTestCount();
+      // final latestCount = await getAvailableTestCount();
       return showIOSResultDialog(data,latestCount);
     } else {
       return showResultPopup(data);
