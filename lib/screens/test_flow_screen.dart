@@ -1991,9 +1991,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
 // ==================== iOS ke liye Text Builder (with NA logic) ====================
-
   String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
-    String format(String key, dynamic rawValue) {
+
+    String formatWithUnit(String key, dynamic rawValue) {
       String value = "--";
 
       if (rawValue is Map) {
@@ -2002,9 +2002,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         value = rawValue;
       }
 
-      // 🔥 Same logic as formatValue function
       value = value.trim();
 
+      // same logic
       if (value == "-1.00" || value == "-1" || value == "-1.0" || value.startsWith("-")) {
         value = "NA";
       }
@@ -2013,18 +2013,57 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         if (key == "P") value = "Absent";
       }
 
-      return value;
+      // 🔥 unit logic (same as _resultRow)
+      String unit = resultUnits[key] ?? "";
+
+      if (value == "NA" || value == "Absent" || value == "inf") {
+        unit = "";
+      }
+
+      return unit.isNotEmpty ? "$value $unit" : value;
     }
 
     return
-      "Protein: ${format("P", data["P"])}\n"
-          "Urine Creatinine: ${format("U", data["U"])}\n"
-          "Serum Creatinine: ${format("S", data["S"])}\n"
-          "eGFR: ${format("e", data["e"])}\n"
-          "P/C Ratio: ${format("r", data["r"])}\n\n"
+      "Protein: ${formatWithUnit("P", data["P"])}\n"
+          "Urine Creatinine: ${formatWithUnit("U", data["U"])}\n"
+          "Serum Creatinine: ${formatWithUnit("S", data["S"])}\n"
+          "eGFR: ${formatWithUnit("e", data["e"])}\n"
+          "P/C Ratio: ${formatWithUnit("r", data["r"])}\n\n"
           "Available Tests: $latestCount";
   }
-}
+//   String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
+//     String format(String key, dynamic rawValue) {
+//       String value = "--";
+//
+//       if (rawValue is Map) {
+//         value = rawValue["value"] ?? "--";
+//       } else if (rawValue is String) {
+//         value = rawValue;
+//       }
+//
+//       // 🔥 Same logic as formatValue function
+//       value = value.trim();
+//
+//       if (value == "-1.00" || value == "-1" || value == "-1.0" || value.startsWith("-")) {
+//         value = "NA";
+//       }
+//
+//       if (value.toLowerCase() == "absent" || value == "0.00" || value == "0" || value == "0.0") {
+//         if (key == "P") value = "Absent";
+//       }
+//
+//       return value;
+//     }
+//
+//     return
+//       "Protein: ${format("P", data["P"])}\n"
+//           "Urine Creatinine: ${format("U", data["U"])}\n"
+//           "Serum Creatinine: ${format("S", data["S"])}\n"
+//           "eGFR: ${format("e", data["e"])}\n"
+//           "P/C Ratio: ${format("r", data["r"])}\n\n"
+//           "Available Tests: $latestCount";
+//   }
+// }
 class CalibrationDialog extends StatefulWidget {
   // final Function(String) sendCommand;
 
