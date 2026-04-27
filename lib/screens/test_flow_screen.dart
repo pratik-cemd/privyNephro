@@ -1454,15 +1454,36 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       availableTests = count;
     });
   }
+  // Future<int> getAvailableTestCount() async {
+  //   final ref = dbRef.child(
+  //       "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
+  //
+  //   final snapshot = await ref.get();
+  //
+  //   if (!snapshot.exists) return 0;
+  //
+  //   return (snapshot.value as num).toInt();
+  // }
   Future<int> getAvailableTestCount() async {
-    final ref = dbRef.child(
-        "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
+    try {
+      final ref = dbRef.child(
+          "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
 
-    final snapshot = await ref.get();
+      final snapshot = await ref.get();
 
-    if (!snapshot.exists) return 0;
+      if (!snapshot.exists || snapshot.value == null) return 0;
 
-    return (snapshot.value as num).toInt();
+      final value = snapshot.value;
+
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ??  0;
+
+      return 0;
+    } catch (e) {
+      print("Error in getAvailableTestCount: $e");
+      return 0;
+    }
   }
   Future<int> _decreaseTestCount() async {
     final ref = dbRef.child(
@@ -1845,11 +1866,12 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
   Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-    int latestCount = await getAvailableTestCount();
-
+    // int latestCount = await getAvailableTestCount();
+    int latestCount = await getAvailableTestCount() ?? 0;
     // 🔥 Firebase update ke baad hi -1 karo
-    int displayCount = latestCount - 1;
+    // int displayCount = latestCount - 1;
 
+    int displayCount = (latestCount - 1).clamp(0, 999);
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1865,9 +1887,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n";
+            "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
             // 🔥 NEW LINE (Available Test)
-            //     "Available Tests: $displayCount";
+                "Available Tests: $displayCount";
             }
 
       showDialog(
