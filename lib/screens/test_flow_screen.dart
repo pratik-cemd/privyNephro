@@ -29,7 +29,7 @@ class TestFlowScreen extends StatefulWidget {
 
 class _TestFlowScreenState extends State<TestFlowScreen>
     with SingleTickerProviderStateMixin {
-  FlutterTts tts = FlutterTts();  //voice
+  FlutterTts tts = FlutterTts(); //voice
   Timer? calibTimer;
   GlobalKey<_CalibrationDialogState>? calibDialogKey;
 
@@ -52,7 +52,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   String? pendingTest;
   List<String> selectedTests = [];
   Set<String> completedTests = {};
-  int availableTests =0;
+  int availableTests = 0;
   final List<String> allTests = ["PROTEIN", "SCRT", "UCRT"];
   late AnimationController _controller;
 
@@ -64,7 +64,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     "r": "",
   };
 
-  bool isMuted =false;
+  bool isMuted = false;
   String selectedLang = "en-IN"; // default
 
   Map<String, String> langMap = {
@@ -73,10 +73,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     "Gujarati": "gu-IN",
     "Marathi": "mr-IN",
   };
-  bool isDeviceBusy = false;   // ESP se update karna
+  bool isDeviceBusy = false; // ESP se update karna
   String lastStatus = "";
 
-  bool isReconnecting = false;      // optional
+  bool isReconnecting = false; // optional
 
 
   @override
@@ -92,7 +92,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     selectedDeviceId = widget.deviceId;
     loadAvailableTests();
     _syncOfflineQueue();
-    _netSub = FirebaseDatabase.instance.ref(".info/connected").onValue.listen((event) {
+    _netSub = FirebaseDatabase.instance
+        .ref(".info/connected")
+        .onValue
+        .listen((event) {
       final connected = event.snapshot.value as bool? ?? false;
       if (connected) {
         _syncOfflineQueue();
@@ -129,7 +132,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
   // ---------------- START TEST ----------------
-    Future<void> startTest(String test) async {
+  Future<void> startTest(String test) async {
     if (isRunning) {
       setState(() {
         pendingTest = test;
@@ -248,8 +251,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     } else if (cmd == pendingTest) {
       return Colors.orange.shade300;
     }
-    else if (completedTests.contains(cmd))
-    {
+    else if (completedTests.contains(cmd)) {
       return Colors.green.shade300;
     } else {
       return Colors.white;
@@ -260,30 +262,31 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   void showNextPopup() {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        title: const Text("Next Test"),
-        content: Text("Run ${getName(pendingTest!)}?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              pendingTest = null;
-            },
-            child: const Text("Cancel"),
+      builder: (_) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+            title: const Text("Next Test"),
+            content: Text("Run ${getName(pendingTest!)}?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  pendingTest = null;
+                },
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  String next = pendingTest!;
+                  pendingTest = null;
+                  startTest(next);
+                },
+                child: const Text("Start"),
+              )
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              String next = pendingTest!;
-              pendingTest = null;
-              startTest(next);
-            },
-            child: const Text("Start"),
-          )
-        ],
-      ),
     );
   }
 
@@ -300,7 +303,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       return const Icon(Icons.check_circle,
           size: 80, color: Colors.green);
     }
-
 
 
     return const Icon(Icons.hourglass_empty,
@@ -326,7 +328,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       connectionSub?.cancel(); // 🔥 clear
 
       connectionSub = widget.device.connectionState.listen((state) {
-
         if (state == BluetoothConnectionState.connected) {
           isDeviceConnected = true;
 
@@ -429,6 +430,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       debugPrint("❌ Write Error: $e");
     }
   }
+
   // ---------------- RESPONSE ----------------
   Future<void> handleResponse(String res) async {
     debugPrint("ESP: $res");
@@ -448,7 +450,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       setState(() {
         status = "WAIT SAMPLE";
       });
-     await speak("Please insert sample");
+      await speak("Please insert sample");
     }
     else if (res.contains("TEST_STARTED")) {
       setState(() {
@@ -460,7 +462,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       waitReconnectAndCheckTest(runningTest == "PROTEIN" ? 5 : 100
       );
     }
-    else if (res.contains("TST:DONE") ||res.contains("TEST_DONE")) {
+    else if (res.contains("TST:DONE") || res.contains("TEST_DONE")) {
       print("🔥 new  Test Done from device");
 
       setState(() {
@@ -471,9 +473,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         selectedTests.remove(runningTest);
       });
 
-     await speak("Test completed");
-
-
+      await speak("Test completed");
     }
     // else if (res.contains("TEST_DONE")) {
     //   print("🔥 Test Done from device");
@@ -495,7 +495,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         status = "ERROR";
         isRunning = false;
       });
-     await speak("Error occurred during test");
+      await speak("Error occurred during test");
     }
     else if (res.contains("#RESP:OK:Test not Performed")) {
       setState(() {
@@ -530,7 +530,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       switch (state) {
         case "WAIT_BLANK":
           print("🔥 Wait blank");
-         await speak("Wait blank sample");
+          await speak("Wait blank sample");
           calibDialogKey!.currentState!.updateStep(0);
           break;
 
@@ -676,7 +676,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     else if ((res.startsWith("#RESP:OK") ||
         (res.contains("P:") && res.contains("U:")))
         && !isResultShown) {
-
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
@@ -690,7 +689,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       // 🔥 STEP 1: Decrease count FIRST
       // 🔥 1. Decrease count and get the NEW value directly from transaction
       final freshCount = await _decreaseTestCount();
-
 
 
       // 🔥 STEP 3: Parse values
@@ -733,7 +731,14 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       }
 
       // 🔥 STEP 4: Save result with FRESH count
-      await _updateResultDB(pValue, sValue, uValue, eValue, rValue, refValue, freshCount);
+      await _updateResultDB(
+          pValue,
+          sValue,
+          uValue,
+          eValue,
+          rValue,
+          refValue,
+          freshCount);
 
       if (!mounted) return;
 
@@ -896,7 +901,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
               });
 
               if (!isMuted) {
-               await speak("Sound enabled");
+                await speak("Sound enabled");
               } else {
                 await speak("Sound disabled");
               }
@@ -948,68 +953,69 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
                   // STATUS CARD
                   GestureDetector(
-                  onTap: () {
-                  speakCurrentStatus();
-                  },
-                  child: ClipRRect(
-                  // ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25), // ✅ not too transparent
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+                    onTap: () {
+                      speakCurrentStatus();
+                    },
+                    child: ClipRRect(
+                      // ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            // ✅ not too transparent
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
 
-                            // 🔵 BIG STATUS ICON
-                            buildStatusIcon(),
+                              // 🔵 BIG STATUS ICON
+                              buildStatusIcon(),
 
-                            const SizedBox(height: 20),
+                              const SizedBox(height: 20),
 
-                            // 🔤 STATUS TEXT (main focus)
-                            Text(
-                              status,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                              // 🔤 STATUS TEXT (main focus)
+                              Text(
+                                status,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
 
-                            const SizedBox(height: 10),
+                              const SizedBox(height: 10),
 
-                            // 🔔 BUZZER
-                            buildBuzzer(),
+                              // 🔔 BUZZER
+                              buildBuzzer(),
 
-                            const SizedBox(height: 8),
+                              const SizedBox(height: 8),
 
-                            // 🧪 TEST NAME
-                            Text(
-                              getName(runningTest),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                              // 🧪 TEST NAME
+                              Text(
+                                getName(runningTest),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
 
+                        ),
                       ),
                     ),
                   ),
-                  ),
-                 const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
                   // PROGRESS
                   Padding(
@@ -1026,7 +1032,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
                   const SizedBox(height: 6),
 
                   Text("${(progress * 100).toInt()}%"
-                    ,style: const TextStyle(color: Colors.white),),
+                    , style: const TextStyle(color: Colors.white),),
 
                   const SizedBox(height: 30),
 
@@ -1067,18 +1073,17 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       margin: const EdgeInsets.only(bottom: 12),
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: ()  //startTest(cmd),
-          {
-            // if (completedTests.contains(cmd)) {
-            //   showRetestDialog(cmd); // 🔥 confirm dialog
-            // } else {
-            // startTest(cmd);
-            // }
-            showTestConfirmDialog(cmd);
-            
-          },
+        onPressed: () //startTest(cmd),
+        {
+          // if (completedTests.contains(cmd)) {
+          //   showRetestDialog(cmd); // 🔥 confirm dialog
+          // } else {
+          // startTest(cmd);
+          // }
+          showTestConfirmDialog(cmd);
+        },
 
-        
+
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: getButtonColor(cmd),
@@ -1113,6 +1118,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       ),
     );
   }
+
   Widget buildFinishButton() {
     // bool isEnabled = selectedTests.isNotEmpty || runningTest.isNotEmpty;
 
@@ -1138,7 +1144,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         ),
       ),
     );
-
   }
 
 
@@ -1161,54 +1166,55 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        title: const Text("Test Summary"),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      builder: (_) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+            title: const Text("Test Summary"),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-              const Text("✅ Completed Tests:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 5),
-              Text(completedNames),
+                  const Text("✅ Completed Tests:",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  Text(completedNames),
 
-              // 🔥 ONLY SHOW IF REMAINING EXISTS
-              if (hasRemaining) ...[
-                const SizedBox(height: 15),
-                const Text("⏳ Remaining Tests:",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                Text(remainingNames),
-              ],
+                  // 🔥 ONLY SHOW IF REMAINING EXISTS
+                  if (hasRemaining) ...[
+                    const SizedBox(height: 15),
+                    const Text("⏳ Remaining Tests:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 5),
+                    Text(remainingNames),
+                  ],
 
-              const SizedBox(height: 15),
-              const Text("What do you want to do?"),
+                  const SizedBox(height: 15),
+                  const Text("What do you want to do?"),
+                ],
+              ),
+            ),
+            actions: [
+
+              // 🔥 ONLY SHOW BUTTON IF REMAINING EXISTS
+              if (hasRemaining)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Remaining Test Process"),
+                ),
+
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await getResultFromDevice();
+                },
+                child: const Text("Get Result"),
+              ),
             ],
           ),
-        ),
-        actions: [
-
-          // 🔥 ONLY SHOW BUTTON IF REMAINING EXISTS
-          if (hasRemaining)
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Remaining Test Process"),
-            ),
-
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await getResultFromDevice();
-            },
-            child: const Text("Get Result"),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1223,7 +1229,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     await sendCommand("#GET:finalResult");
   }
 
-   Map<String, dynamic> parseResult(String res) {
+  Map<String, dynamic> parseResult(String res) {
     Map<String, dynamic> result = {};
 
     try {
@@ -1238,34 +1244,33 @@ class _TestFlowScreenState extends State<TestFlowScreen>
           String value = kv[1].trim();
 
           if (key == "P") {
-              final regex = RegExp(r'([-\d.]+)\(([-\d.]+)\)');
-              final match = regex.firstMatch(value);
+            final regex = RegExp(r'([-\d.]+)\(([-\d.]+)\)');
+            final match = regex.firstMatch(value);
 
-              String val = "--";
-              String ref = "--";
+            String val = "--";
+            String ref = "--";
 
-              if (match != null) {
-                val = match.group(1) ?? "--";
-                ref = match.group(2) ?? "--";
-              } else {
-                val = value;
-              }
+            if (match != null) {
+              val = match.group(1) ?? "--";
+              ref = match.group(2) ?? "--";
+            } else {
+              val = value;
+            }
 
-              // 🔥 MAIN FIX (यहीं करो)
-              if (val.startsWith("-")) {
-                val = "NA";
-              }
+            // 🔥 MAIN FIX (यहीं करो)
+            if (val.startsWith("-")) {
+              val = "NA";
+            }
 
-              if (ref.startsWith("-")) {
-                ref = "NA";
-              }
+            if (ref.startsWith("-")) {
+              ref = "NA";
+            }
 
-              result["P"] = {
-                "value": val,
-                "ref": ref,
-                "raw": value
-              };
-
+            result["P"] = {
+              "value": val,
+              "ref": ref,
+              "raw": value
+            };
           } else {
             result[key] = {
               "value": value,
@@ -1281,9 +1286,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     return result;
   }
+
   String formatValue(String key, String value) {
-
-
     if (value.isEmpty) return "--";
 
     // 🔥 Remove bracket part: "2.56(0.123456)" → "2.56"
@@ -1311,6 +1315,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     return value;
   }
+
   Future<void> showResultPopup(Map<String, dynamic> data) async {
     int latestCount = await getAvailableTestCount();
 
@@ -1321,40 +1326,41 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text("Test Result"),
-        content: data.containsKey("error")
-            ? Text(data["error"]!)
-            : Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _resultRow(Icons.science, "Protein", "P", data),
-            _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
-            _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
-            _resultRow(Icons.bar_chart, "eGFR", "e", data),
-            _resultRow(Icons.balance, "P/C Ratio", "r", data),
-            const SizedBox(height: 12),
-            Text(
-              "Available Tests: $latestCount",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: getTestCountColor(latestCount),
-              ),
+      builder: (dialogContext) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(); // 🔥 pehle dialog band
-            },
-            child: const Text("OK"),
-          )
-        ],
-      ),
+            title: const Text("Test Result"),
+            content: data.containsKey("error")
+                ? Text(data["error"]!)
+                : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _resultRow(Icons.science, "Protein", "P", data),
+                _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+                _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+                _resultRow(Icons.bar_chart, "eGFR", "e", data),
+                _resultRow(Icons.balance, "P/C Ratio", "r", data),
+                const SizedBox(height: 12),
+                Text(
+                  "Available Tests: $latestCount",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: getTestCountColor(latestCount),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop(); // 🔥 pehle dialog band
+                },
+                child: const Text("OK"),
+              )
+            ],
+          ),
     );
 
     // 🔥 dialog band hone ke baad navigation karo
@@ -1363,9 +1369,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => MyDevicesPage2(
-          user: widget.user,
-        ),
+        builder: (_) =>
+            MyDevicesPage2(
+              user: widget.user,
+            ),
       ),
     );
 
@@ -1399,32 +1406,35 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   void showRetestDialog(String cmd) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text("Confirm"),
-        content: Text("Do you want to run ${getName(cmd)} again?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // ❌ NO → bas close
-            },
-            child: const Text("No"),
+      builder: (_) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text("Confirm"),
+            content: Text("Do you want to run ${getName(cmd)} again?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // ❌ NO → bas close
+                },
+                child: const Text("No"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // dialog close
+                  startTest(cmd); // 🔥 dubara test start
+                },
+                child: const Text("Yes"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // dialog close
-              startTest(cmd); // 🔥 dubara test start
-            },
-            child: const Text("Yes"),
-          ),
-        ],
-      ),
     );
   }
 
-  Future<bool> _updateResultDB(String P_result,String S_result,String U_result,String e_result,String R_result, String refValue,int count) async {
+  Future<bool> _updateResultDB(String P_result, String S_result,
+      String U_result, String e_result, String R_result, String refValue,
+      int count) async {
     final now = DateTime.now();
     // final key =
     //     "${now.day}-${now.month}-${now.year}_${now.hour}:${now.minute}:${now
@@ -1436,10 +1446,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       "dt": key,
       "id": selectedDeviceId,
       "p": P_result,
-      "s":S_result,
-      "u":U_result,
-      "e":e_result,
-      "r":R_result,
+      "s": S_result,
+      "u": U_result,
+      "e": e_result,
+      "r": R_result,
       "volt": refValue,
       "count": count,
 
@@ -1510,6 +1520,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       return 0;
     }
   }
+
   Future<int> _decreaseTestCount() async {
     final ref = dbRef.child(
         "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
@@ -1536,8 +1547,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     return newValue;
   }
-  Widget _resultRow(IconData icon, String label, String key, Map<String, dynamic> data) {
 
+  Widget _resultRow(IconData icon, String label, String key,
+      Map<String, dynamic> data) {
     final item = data[key];
 
     String value = "--";
@@ -1586,6 +1598,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       ),
     );
   }
+
   Color getTestCountColor(int count) {
     if (count == 0) {
       return Colors.red;
@@ -1648,25 +1661,26 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => CalibrationDialog(
-        key: calibDialogKey,
-        onStartStd: () async {
-          // await sendSafeCommand("#START:CALIB_NEXT");
-          await sendCommand("#START:CALIB_NEXT");
-        },
-        onCalibrationComplete: () async {
-          await disconnectDevice(); // 🔥 BLE OFF HERE
-          // 🔥 ADD THIS (MAIN FIX)
-          setState(() {
-            status = "IDLE";
-            isRunning = false;
-            progress = 0;
-            runningTest = "";
-          });
+      builder: (_) =>
+          CalibrationDialog(
+            key: calibDialogKey,
+            onStartStd: () async {
+              // await sendSafeCommand("#START:CALIB_NEXT");
+              await sendCommand("#START:CALIB_NEXT");
+            },
+            onCalibrationComplete: () async {
+              await disconnectDevice(); // 🔥 BLE OFF HERE
+              // 🔥 ADD THIS (MAIN FIX)
+              setState(() {
+                status = "IDLE";
+                isRunning = false;
+                progress = 0;
+                runningTest = "";
+              });
 
-          await ("Device is ready");
-        },
-      ),
+              await ("Device is ready");
+            },
+          ),
     );
 
     await Future.delayed(Duration(milliseconds: 200));
@@ -1676,7 +1690,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     await sendCommand("#START:CALIB");
     setState(() {
-      isRunning = true;   // 🔥 ADD
+      isRunning = true; // 🔥 ADD
       status = "CALIBRATION";
     });
     // UI update
@@ -1686,6 +1700,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     // 🔥 Start polling
     // startCalibPolling();
   }
+
   Future<void> waitReconnectAndCheckTest(int seconds) async {
     print("⏳ Waiting $seconds sec before reconnect (TEST)");
 
@@ -1711,7 +1726,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         status = "DEVICE NOT CONNECTED";
         isRunning = false;
       });
-     await speak("Device not connected");
+      await speak("Device not connected");
       return;
     }
 
@@ -1719,6 +1734,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     await sendCommand("#GET:TEST_STATUS");
   }
+
   Future<void> waitReconnectAndCheck(int seconds) async {
     print("⏳ Waiting $seconds sec before reconnect");
 
@@ -1737,6 +1753,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     await sendCommand("#GET:CALIB_STATUS");
   }
+
   Future<void> reconnectAfterProcessing() async {
     // speak("wait for Reconnecting device");
     if (isReconnecting) return; // 🔥 avoid double
@@ -1760,36 +1777,37 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   Future<void> showTestConfirmDialog(String cmd) async {
     String name = getName(cmd);
 
-   await speak("Do you want to start $name");
+    await speak("Do you want to start $name");
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text("Start Test"),
-        content: Text("Do you want to start $name?"),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await speak("Test cancelled");
-            },
-            child: const Text("No"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
+      builder: (_) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text("Start Test"),
+            content: Text("Do you want to start $name?"),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await speak("Test cancelled");
+                },
+                child: const Text("No"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
 
-             await speak("Starting $name");
+                  await speak("Starting $name");
 
-              startTest(cmd);
-            },
-            child: const Text("Yes"),
+                  startTest(cmd);
+                },
+                child: const Text("Yes"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1801,7 +1819,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
   }
 
-   Future<bool> forceReconnect() async {
+  Future<bool> forceReconnect() async {
     try {
       // 🔴 STEP 1: Disconnect if already connected
       await disconnectDevice();
@@ -1822,6 +1840,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       return false;
     }
   }
+
   Future<bool> waitUntilDeviceFree() async {
     int retry = 0;
 
@@ -1839,7 +1858,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
   Future<void> sendSafeCommand(String cmd) async {
-
     // 🔴 Step 1: check connection only
     if (!isDeviceConnected) {
       print("⚠️ Device not connected, skip: $cmd");
@@ -1862,16 +1880,19 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   }
 
 
-  Future<void> showResultPopup_2(Map<String, dynamic> data,int latestCount) async {
+  Future<void> showResultPopup_2(Map<String, dynamic> data,
+      int latestCount) async {
     // if (Platform.isIOS) {
     //   // final latestCount = await getAvailableTestCount();
     //   return showIOSResultDialog(data,latestCount);
     // } else {
     //   return showResultPopup(data);
     // }
-    await showResultDialog(data, latestCount);   // ← single function
+    await showResultDialog(data, latestCount); // ← single function
   }
-  Future<void> showIOSResultDialog(Map<String, dynamic> data, int latestCount) async {
+
+  Future<void> showIOSResultDialog(Map<String, dynamic> data,
+      int latestCount) async {
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1888,11 +1909,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
             "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
-            "Available Tests: $latestCount";   // ← use the passed fresh count directly
+            "Available Tests: $latestCount"; // ← use the passed fresh count directly
       }
 
       showDialog(
-        context: context,                    // use the state's context
+        context: context, // use the state's context
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
@@ -1925,7 +1946,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
   // ==================== SINGLE RESULT DIALOG FOR BOTH ANDROID & iOS ====================
 
-  Future<void> showResultDialog(Map<String, dynamic> data, int latestCount) async {
+  Future<void> showResultDialog(Map<String, dynamic> data,
+      int latestCount) async {
     if (!mounted) return;
 
     await Future.delayed(const Duration(milliseconds: 100));
@@ -1935,64 +1957,65 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text("Test Result"),
-        content: data.containsKey("error")
-            ? Text(data["error"]!)
-            : isIOS
-            ? SingleChildScrollView(           // iOS → Clean Text (no icons)
-          child: Text(
-            _buildIOSResultText(data, latestCount),
-            style: const TextStyle(height: 1.6, fontSize: 15.5),
-          ),
-        )
-            : Column(                          // Android → Rich layout with icons
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _resultRow(Icons.science, "Protein", "P", data),
-            _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
-            _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
-            _resultRow(Icons.bar_chart, "eGFR", "e", data),
-            _resultRow(Icons.balance, "P/C Ratio", "r", data),
-            const SizedBox(height: 16),
-            Text(
-              "Available Tests: $latestCount",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: getTestCountColor(latestCount),
-              ),
+      builder: (dialogContext) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-
-              if (!mounted) return;
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MyDevicesPage2(user: widget.user),
+            title: const Text("Test Result"),
+            content: data.containsKey("error")
+                ? Text(data["error"]!)
+                : isIOS
+                ? SingleChildScrollView( // iOS → Clean Text (no icons)
+              child: Text(
+                _buildIOSResultText(data, latestCount),
+                style: const TextStyle(height: 1.6, fontSize: 15.5),
+              ),
+            )
+                : Column( // Android → Rich layout with icons
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _resultRow(Icons.science, "Protein", "P", data),
+                _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+                _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+                _resultRow(Icons.bar_chart, "eGFR", "e", data),
+                _resultRow(Icons.balance, "P/C Ratio", "r", data),
+                const SizedBox(height: 16),
+                Text(
+                  "Available Tests: $latestCount",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: getTestCountColor(latestCount),
+                  ),
                 ),
-              );
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
 
-              await disconnectDevice();
-            },
-            child: const Text("OK"),
+                  if (!mounted) return;
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyDevicesPage2(user: widget.user),
+                    ),
+                  );
+
+                  await disconnectDevice();
+                },
+                child: const Text("OK"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
 // ==================== iOS ke liye Text Builder (with NA logic) ====================
-  String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
 
+  String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
     String formatWithUnit(String key, dynamic rawValue) {
       String value = "--";
 
@@ -2005,11 +2028,13 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       value = value.trim();
 
       // same logic
-      if (value == "-1.00" || value == "-1" || value == "-1.0" || value.startsWith("-")) {
+      if (value == "-1.00" || value == "-1" || value == "-1.0" ||
+          value.startsWith("-")) {
         value = "NA";
       }
 
-      if (value.toLowerCase() == "absent" || value == "0.00" || value == "0" || value == "0.0") {
+      if (value.toLowerCase() == "absent" || value == "0.00" || value == "0" ||
+          value == "0.0") {
         if (key == "P") value = "Absent";
       }
 
@@ -2031,6 +2056,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
           "P/C Ratio: ${formatWithUnit("r", data["r"])}\n\n"
           "Available Tests: $latestCount";
   }
+}
 //   String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
 //     String format(String key, dynamic rawValue) {
 //       String value = "--";
