@@ -1867,7 +1867,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
             "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
             // 🔥 NEW LINE (Available Test)
-                "Available Tests: $displayCount";
+            //     "Available Tests: $displayCount";
             }
 
       showDialog(
