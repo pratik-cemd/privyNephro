@@ -1476,11 +1476,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       if (!snapshot.exists || snapshot.value == null) return 0;
 
-      showMessage(
-          "Device: $selectedDeviceId | Value: ${snapshot.value} | Exists: ${snapshot.exists}"
-      );
-      final value = snapshot.value;
 
+      final value = snapshot.value;
+      showMessage(
+          "Device: $selectedDeviceId | Value: $value"
+      );
       if (value is int) return value;
       if (value is num) return value.toInt();
       if (value is String) return int.tryParse(value) ??  0;
@@ -1865,23 +1865,21 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
   Future<void> showResultPopup_2(Map<String, dynamic> data) async {
     if (Platform.isIOS) {
-      return showIOSResultDialog(data);
+      final latestCount = await getAvailableTestCount();
+      return showIOSResultDialog(data,latestCount);
     } else {
       return showResultPopup(data);
     }
   }
 
-  Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
+  Future<void> showIOSResultDialog(Map<String, dynamic> data,int latestCount) async {
     // int latestCount = await getAvailableTestCount();
-    int latestCount = await getAvailableTestCount() ?? 0;
-    // 🔥 Firebase update ke baad hi -1 karo
-    // int displayCount = latestCount - 1;
+    // int latestCount = await getAvailableTestCount();
+    showMessage("latestCount before dialog: $latestCount");
+    final displayCount = (latestCount - 1).clamp(0, 999);
 
-    int displayCount = (latestCount - 1).clamp(0, 999);
-
-    showMessage(
-        "Device: $selectedDeviceId | last: $latestCount | display: $displayCount"
-    );
+    // debug
+    showMessage("FINAL COUNT: $latestCount -> $displayCount");
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
