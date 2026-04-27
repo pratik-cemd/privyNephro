@@ -602,7 +602,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
+        showMessage("TEST Value $availableTests");
         showResultPopup_2(parsed,availableTests);
+
       });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   showResultPopup(parsed);
