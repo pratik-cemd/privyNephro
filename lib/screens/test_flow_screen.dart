@@ -582,7 +582,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         (res.contains("P:") && res.contains("U:")))
         && !isResultShown){
 
-      final latestCount1 = await getAvailableTestCount();
+
+
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
@@ -598,14 +599,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       // });
       // showResultPopup(parsed); // 🔥 POPUP SHOW
 
-      if (!mounted) return;
 
-      Future.delayed(Duration.zero, () {
-        if (!mounted) return;
-        showMessage("TEST Value $availableTests ,,,, $latestCount1");
-        showResultPopup_2(parsed,latestCount1);
-
-      });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   showResultPopup(parsed);
       // });
@@ -662,6 +656,15 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       await _decreaseTestCount();
       // });
+      final freshCount = await getAvailableTestCount();
+      if (!mounted) return;
+
+      Future.delayed(Duration.zero, () {
+        if (!mounted) return;
+        showMessage("TEST Value $availableTests ,,,, $freshCount");
+        showResultPopup_2(parsed,freshCount);
+
+      });
       setState(() {
         status = "IDLE";
         progress = 0;
@@ -1874,14 +1877,69 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
   }
 
-  Future<void> showIOSResultDialog(Map<String, dynamic> data,int latestCount) async {
-    // int latestCount = await getAvailableTestCount();
-    // int latestCount = await getAvailableTestCount();
-    showMessage("latestCount before dialog: $latestCount");
-    final displayCount = (latestCount - 1).clamp(0, 999);
+  // Future<void> showIOSResultDialog(Map<String, dynamic> data,int latestCount) async {
+  //   // int latestCount = await getAvailableTestCount();
+  //   // int latestCount = await getAvailableTestCount();
+  //   showMessage("latestCount before dialog: $latestCount");
+  //
+  //
+  //   // debug
+  //   showMessage("FINAL COUNT: $latestCount");
+  //   if (!mounted) return;
+  //
+  //   Future.delayed(Duration.zero, () {
+  //     if (!mounted) return;
+  //
+  //     String message = "";
+  //
+  //     if (data.containsKey("error")) {
+  //       message = data["error"];
+  //     } else {
+  //       message =
+  //           "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+  //           "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
+  //           "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
+  //           "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
+  //           "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
+  //           // 🔥 NEW LINE (Available Test)
+  //               "Available Tests: $latestCount";
+  //           }
+  //
+  //     showDialog(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder: (ctx) {
+  //         return AlertDialog(
+  //           title: Text("Test Result"),
+  //           content: SingleChildScrollView(
+  //             child: Text(message),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () async {
+  //                 Navigator.of(ctx).pop();
+  //
+  //                 if (!mounted) return;
+  //
+  //                 Navigator.pushReplacement(
+  //                   context,
+  //                   MaterialPageRoute(
+  //                     builder: (_) => MyDevicesPage2(user: widget.user),
+  //                   ),
+  //                 );
+  //
+  //                 await disconnectDevice();
+  //               },
+  //               child: Text("OK"),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   });
+  // }
 
-    // debug
-    showMessage("FINAL COUNT: $latestCount -> $displayCount");
+  Future<void> showIOSResultDialog(Map<String, dynamic> data, int latestCount) async {
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1893,24 +1951,21 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         message = data["error"];
       } else {
         message =
-            "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
+        "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
             "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
             "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
             "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
             "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
-            // 🔥 NEW LINE (Available Test)
-                "Available Tests: $displayCount";
-            }
+            "Available Tests: $latestCount";   // ← use the passed fresh count directly
+      }
 
       showDialog(
-        context: context,
+        context: context,                    // use the state's context
         barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
-            title: Text("Test Result"),
-            content: SingleChildScrollView(
-              child: Text(message),
-            ),
+            title: const Text("Test Result"),
+            content: SingleChildScrollView(child: Text(message)),
             actions: [
               TextButton(
                 onPressed: () async {
@@ -1927,7 +1982,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
                   await disconnectDevice();
                 },
-                child: Text("OK"),
+                child: const Text("OK"),
               ),
             ],
           );
