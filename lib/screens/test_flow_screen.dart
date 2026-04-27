@@ -578,33 +578,122 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
     // ✅ RESULT HANDLE
     // else if (res.startsWith("#RESP:OK") && !isResultShown) {
+//     else if ((res.startsWith("#RESP:OK") ||
+//         (res.contains("P:") && res.contains("U:")))
+//         && !isResultShown){
+//
+//
+//
+//       setState(() {
+//         status = "RESULT RECEIVED";
+//         isRunning = false;
+//         isResultShown = true; // 🔥 MUST ADD
+//       });
+//       await speak("Test completed successfully");
+//
+//       Map<String, dynamic> parsed = parseResult(res);
+//
+//       // 🔥 DEBUG DIALOG (ADD THIS)
+//       // WidgetsBinding.instance.addPostFrameCallback((_) {
+//       //   showIOSDebugDialog(res);
+//       // });
+//       // showResultPopup(parsed); // 🔥 POPUP SHOW
+//
+//
+//       // WidgetsBinding.instance.addPostFrameCallback((_) {
+//       //   showResultPopup(parsed);
+//       // });
+//       // await disconnectDevice();
+//       // 🔥 SAVE TO DB HERE
+//       String pValue = "--";
+//       String sValue = "--";
+//       String uValue = "--";
+//       String eValue = "--";
+//       String rValue = "--";
+//       String refValue = "--";
+//
+//       String rawP = parsed["P"]["raw"] ?? "";
+//
+//       // final regex = RegExp(r'([\d.]+)\(([\d.]+)\)');
+//       // final regex = RegExp(r'([A-Za-z0-9.\s]+)\(([-\d.]+)\)');
+//       final regex = RegExp(r'([-\dA-Za-z0-9.\s]+)\(([-\d.]+)\)');
+//       // final regex = RegExp(r'([-\d.]+)\(([-\d.]+)\)');
+//       final match = regex.firstMatch(rawP);
+//
+//       if (match != null) {
+//         pValue = match.group(1) ?? "--";
+//         refValue = match.group(2) ?? "--";
+//       } else {
+//         pValue = rawP;
+//         refValue = "--";
+//       }
+//       // 🔥 FORCE FIX FOR PROTEIN
+//       if (pValue.startsWith("-")) {
+//         pValue = "NA";
+//       }
+//       print("DEBUG REF VALUE: $refValue");
+//       sValue = parsed["S"]?["value"] ?? parsed["S"] ?? "--";
+//       uValue = parsed["U"]?["value"] ?? parsed["U"] ?? "--";
+//       eValue = parsed["e"]?["value"] ?? parsed["e"] ?? "--";
+//       rValue = parsed["r"]?["value"] ?? parsed["r"] ?? "--";
+// // 🔥 CLEAN HERE
+//       pValue = formatValue("P", pValue);
+//       // 🔥 HARD CHECK (important)
+//       if (pValue == "-1.00" || pValue == "-1" || pValue.startsWith("-")) {
+//         pValue = "NA";
+//       }
+//       sValue = formatValue("S", sValue);
+//       uValue = formatValue("U", uValue);
+//       eValue = formatValue("e", eValue);
+//       rValue = formatValue("r", rValue);
+//
+//
+//       if (refValue == "-1.00" || refValue == "-1.000000" || refValue.startsWith("-1")|| refValue == "--") {
+//         refValue = "NA";
+//       }
+//       // Future.microtask(() async {
+//       await _updateResultDB(pValue,sValue,uValue,eValue,rValue,refValue,availableTests);
+//
+//       await _decreaseTestCount();
+//       // });
+//       final freshCount = await getAvailableTestCount();
+//       if (!mounted) return;
+//
+//       Future.delayed(Duration.zero, () {
+//         if (!mounted) return;
+//         showMessage("TEST Value $availableTests ,,,, $freshCount");
+//         showResultPopup_2(parsed,freshCount);
+//
+//       });
+//       setState(() {
+//         status = "IDLE";
+//         progress = 0;
+//         runningTest = "";
+//         isResultShown = false;
+//       });
+//     }
+    // ✅ RESULT HANDLE - REPLACE THIS WHOLE BLOCK
     else if ((res.startsWith("#RESP:OK") ||
         (res.contains("P:") && res.contains("U:")))
-        && !isResultShown){
-
-
+        && !isResultShown) {
 
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
-        isResultShown = true; // 🔥 MUST ADD
+        isResultShown = true;
       });
+
       await speak("Test completed successfully");
 
       Map<String, dynamic> parsed = parseResult(res);
 
-      // 🔥 DEBUG DIALOG (ADD THIS)
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   showIOSDebugDialog(res);
-      // });
-      // showResultPopup(parsed); // 🔥 POPUP SHOW
+      // 🔥 STEP 1: Decrease count FIRST
+      await _decreaseTestCount();
 
+      // 🔥 STEP 2: Get FRESH count AFTER decrease
+      final freshCount = await getAvailableTestCount();
 
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   showResultPopup(parsed);
-      // });
-      // await disconnectDevice();
-      // 🔥 SAVE TO DB HERE
+      // 🔥 STEP 3: Parse values
       String pValue = "--";
       String sValue = "--";
       String uValue = "--";
@@ -612,12 +701,9 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       String rValue = "--";
       String refValue = "--";
 
-      String rawP = parsed["P"]["raw"] ?? "";
+      String rawP = parsed["P"]?["raw"] ?? "";
 
-      // final regex = RegExp(r'([\d.]+)\(([\d.]+)\)');
-      // final regex = RegExp(r'([A-Za-z0-9.\s]+)\(([-\d.]+)\)');
       final regex = RegExp(r'([-\dA-Za-z0-9.\s]+)\(([-\d.]+)\)');
-      // final regex = RegExp(r'([-\d.]+)\(([-\d.]+)\)');
       final match = regex.firstMatch(rawP);
 
       if (match != null) {
@@ -627,44 +713,40 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         pValue = rawP;
         refValue = "--";
       }
-      // 🔥 FORCE FIX FOR PROTEIN
-      if (pValue.startsWith("-")) {
-        pValue = "NA";
-      }
-      print("DEBUG REF VALUE: $refValue");
+
+      if (pValue.startsWith("-")) pValue = "NA";
+
       sValue = parsed["S"]?["value"] ?? parsed["S"] ?? "--";
       uValue = parsed["U"]?["value"] ?? parsed["U"] ?? "--";
       eValue = parsed["e"]?["value"] ?? parsed["e"] ?? "--";
       rValue = parsed["r"]?["value"] ?? parsed["r"] ?? "--";
-// 🔥 CLEAN HERE
+
       pValue = formatValue("P", pValue);
-      // 🔥 HARD CHECK (important)
-      if (pValue == "-1.00" || pValue == "-1" || pValue.startsWith("-")) {
-        pValue = "NA";
-      }
       sValue = formatValue("S", sValue);
       uValue = formatValue("U", uValue);
       eValue = formatValue("e", eValue);
       rValue = formatValue("r", rValue);
 
-
-      if (refValue == "-1.00" || refValue == "-1.000000" || refValue.startsWith("-1")|| refValue == "--") {
+      if (refValue == "-1.00" || refValue == "-1.000000" ||
+          refValue.startsWith("-1") || refValue == "--") {
         refValue = "NA";
       }
-      // Future.microtask(() async {
-      await _updateResultDB(pValue,sValue,uValue,eValue,rValue,refValue,availableTests);
 
-      await _decreaseTestCount();
-      // });
-      final freshCount = await getAvailableTestCount();
+      // 🔥 STEP 4: Save result with FRESH count
+      await _updateResultDB(pValue, sValue, uValue, eValue, rValue, refValue, freshCount);
+
       if (!mounted) return;
 
+      // 🔥 STEP 5: Show dialog with freshCount
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
-        showMessage("TEST Value $availableTests ,,,, $freshCount");
-        showResultPopup_2(parsed,freshCount);
 
+        showMessage("✅ Fresh Count for Dialog: $freshCount");
+
+        showResultPopup_2(parsed, freshCount);
       });
+
+      // Reset UI
       setState(() {
         status = "IDLE";
         progress = 0;
@@ -1469,26 +1551,60 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   //
   //   return (snapshot.value as num).toInt();
   // }
-  Future<int> getAvailableTestCount() async {
+  // Future<int> getAvailableTestCount() async {
+  //
+  //   try {
+  //     final deviceId = selectedDeviceId.trim();
+  //     final ref = dbRef.child(
+  //         "Devices/${widget.user.mobile}/$deviceId/testCount");
+  //
+  //     final snapshot = await ref.get();
+  //
+  //
+  //     if (!snapshot.exists || snapshot.value == null) return 0;
+  //
+  //
+  //     final value = snapshot.value;
+  //     showMessage(
+  //         "Device: $selectedDeviceId | Value: $value"
+  //     );
+  //     if (value is int) return value;
+  //     if (value is num) return value.toInt();
+  //     if (value is String) return int.tryParse(value) ??  0;
+  //
+  //     return 0;
+  //   } catch (e) {
+  //     print("Error in getAvailableTestCount: $e");
+  //     return 0;
+  //   }
+  // }
 
+  Future<int> getAvailableTestCount() async {
     try {
       final deviceId = selectedDeviceId.trim();
       final ref = dbRef.child(
           "Devices/${widget.user.mobile}/$deviceId/testCount");
 
+      // First read
       final snapshot = await ref.get();
-
-
       if (!snapshot.exists || snapshot.value == null) return 0;
 
+      var value = snapshot.value;
 
-      final value = snapshot.value;
-      showMessage(
-          "Device: $selectedDeviceId | Value: $value"
-      );
+      // 🔥 Extra safety for iOS - do a second read after small delay
+      if (Platform.isIOS) {
+        await Future.delayed(const Duration(milliseconds: 400));
+        final freshSnapshot = await ref.get();
+        if (freshSnapshot.exists && freshSnapshot.value != null) {
+          value = freshSnapshot.value;
+        }
+      }
+
+      showMessage("📊 TestCount -> Device: $selectedDeviceId | Value: $value");
+
       if (value is int) return value;
       if (value is num) return value.toInt();
-      if (value is String) return int.tryParse(value) ??  0;
+      if (value is String) return int.tryParse(value) ?? 0;
 
       return 0;
     } catch (e) {
