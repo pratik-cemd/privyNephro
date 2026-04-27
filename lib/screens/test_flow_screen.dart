@@ -1465,14 +1465,20 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   //   return (snapshot.value as num).toInt();
   // }
   Future<int> getAvailableTestCount() async {
+
     try {
+      final deviceId = selectedDeviceId.trim();
       final ref = dbRef.child(
-          "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
+          "Devices/${widget.user.mobile}/$deviceId/testCount");
 
       final snapshot = await ref.get();
 
+
       if (!snapshot.exists || snapshot.value == null) return 0;
 
+      showMessage(
+          "Device: $selectedDeviceId | Value: ${snapshot.value} | Exists: ${snapshot.exists}"
+      );
       final value = snapshot.value;
 
       if (value is int) return value;
@@ -1872,6 +1878,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     // int displayCount = latestCount - 1;
 
     int displayCount = (latestCount - 1).clamp(0, 999);
+
+    showMessage(
+        "Device: $selectedDeviceId | last: $latestCount | display: $displayCount"
+    );
     if (!mounted) return;
 
     Future.delayed(Duration.zero, () {
@@ -1993,7 +2003,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   //     );
   //   });
   // }
-
+  void showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
 }
 class CalibrationDialog extends StatefulWidget {
   // final Function(String) sendCommand;
