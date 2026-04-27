@@ -582,7 +582,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         (res.contains("P:") && res.contains("U:")))
         && !isResultShown){
 
-
+      final latestCount1 = await getAvailableTestCount();
       setState(() {
         status = "RESULT RECEIVED";
         isRunning = false;
@@ -602,8 +602,8 @@ class _TestFlowScreenState extends State<TestFlowScreen>
 
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
-        showMessage("TEST Value $availableTests");
-        showResultPopup_2(parsed,availableTests);
+        showMessage("TEST Value $availableTests ,,,, $latestCount1");
+        showResultPopup_2(parsed,latestCount1);
 
       });
       // WidgetsBinding.instance.addPostFrameCallback((_) {
