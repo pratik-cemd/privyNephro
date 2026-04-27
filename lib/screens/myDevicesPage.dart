@@ -218,6 +218,23 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
                     ],
                   ),
                 ),
+
+                PopupMenuItem(
+                  value: "Sound",
+                  child: Row(
+                    children: [
+                      Icon(
+                        isMuted ? Icons.volume_off : Icons.volume_up,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isMuted ? "Sound OFF" : "Sound ON",
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             );
 
@@ -266,6 +283,17 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
                       ),
                 ),
               );
+            }
+            else if (selected == "Sound") {
+              setState(() {
+                isMuted = !isMuted;
+              });
+
+              if (!isMuted) {
+                await speak("Sound enabled");
+              } else {
+                await speak("Sound disabled");
+              }
             }
           },
         ),
