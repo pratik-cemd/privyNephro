@@ -688,10 +688,10 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       Map<String, dynamic> parsed = parseResult(res);
 
       // 🔥 STEP 1: Decrease count FIRST
-      await _decreaseTestCount();
+      // 🔥 1. Decrease count and get the NEW value directly from transaction
+      final freshCount = await _decreaseTestCount();
 
-      // 🔥 STEP 2: Get FRESH count AFTER decrease
-      final freshCount = await getAvailableTestCount();
+
 
       // 🔥 STEP 3: Parse values
       String pValue = "--";
@@ -1312,7 +1312,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     return value;
   }
   Future<void> showResultPopup(Map<String, dynamic> data) async {
-    int latestCount = await getAvailableTestCount() - 1;
+    int latestCount = await getAvailableTestCount();
 
     if (!mounted) return;
 
@@ -1612,25 +1612,50 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       return 0;
     }
   }
+  // Future<int> _decreaseTestCount() async {
+  //   final ref = dbRef.child(
+  //       "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
+  //
+  //   int newValue = 0;
+  //
+  //   await ref.runTransaction((current) {
+  //     if (current == null) {
+  //       newValue = 0;
+  //       return Transaction.success(0);
+  //     }
+  //     final val = (current as num).toInt();
+  //     newValue = val > 0 ? val - 1 : 0;
+  //
+  //     return Transaction.success(newValue);
+  //   });
+  //   return newValue; // 🔥 important
+  // }
   Future<int> _decreaseTestCount() async {
     final ref = dbRef.child(
         "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
 
     int newValue = 0;
 
-    await ref.runTransaction((current) {
+    final result = await ref.runTransaction((current) {
       if (current == null) {
         newValue = 0;
         return Transaction.success(0);
       }
       final val = (current as num).toInt();
       newValue = val > 0 ? val - 1 : 0;
-
       return Transaction.success(newValue);
     });
-    return newValue; // 🔥 important
-  }
 
+    // Return the actual committed value from transaction
+    if (result.committed && result.snapshot.value != null) {
+      final committedValue = result.snapshot.value;
+      if (committedValue is num) {
+        newValue = committedValue.toInt();
+      }
+    }
+
+    return newValue;
+  }
   Widget _resultRow(IconData icon, String label, String key, Map<String, dynamic> data) {
 
     final item = data[key];
