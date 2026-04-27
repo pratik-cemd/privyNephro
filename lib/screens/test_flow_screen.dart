@@ -1380,71 +1380,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     //   isResultShown = false;
     // });
   }
-  // Future<void> showResultPopup(Map<String, dynamic> data) async {
-  //   int latestCount = await getAvailableTestCount() -1; // 🔥 fetch latest
-  //   if (!mounted) return;
-  //
-  //   await Future.delayed(Duration(milliseconds: 100));
-  //
-  //   showDialog(
-  //     context:  Navigator.of(context, rootNavigator: true).context, // 🔥 FIX
-  //     builder: (context) => AlertDialog(
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(20),
-  //       ),
-  //       title: const Text("Test Result"),
-  //       content: data.containsKey("error")
-  //           ? Text(data["error"]!)
-  //           : Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         // crossAxisAlignment: CrossAxisAlignment.start,
-  //
-  //         children: [
-  //           _resultRow(Icons.science, "Protein", "P", data),
-  //           _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
-  //           _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
-  //           _resultRow(Icons.bar_chart, "eGFR", "e", data),
-  //           _resultRow(Icons.balance, "P/C Ratio", "r", data),
-  //           const SizedBox(height: 12),
-  //
-  //           // 🔥 NEW LINE
-  //           Text(
-  //             "Available Tests: $latestCount",
-  //             style: TextStyle(
-  //               fontWeight: FontWeight.bold,
-  //               color: getTestCountColor(latestCount),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () async {
-  //             Navigator.pushReplacement(
-  //               context,
-  //               MaterialPageRoute(
-  //                 builder: (_) => MyDevicesPage2(
-  //                   user: widget.user,
-  //                 ),
-  //               ),
-  //
-  //             );
-  //
-  //             await disconnectDevice();
-  //
-  //             setState(() {
-  //               status = "IDLE";
-  //               progress = 0;
-  //               runningTest = "";
-  //               isResultShown = false;
-  //             });
-  //           },
-  //           child: const Text("OK"),
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Future<void> disconnectDevice() async {
     try {
@@ -1541,43 +1476,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       availableTests = count;
     });
   }
-  // Future<int> getAvailableTestCount() async {
-  //   final ref = dbRef.child(
-  //       "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
-  //
-  //   final snapshot = await ref.get();
-  //
-  //   if (!snapshot.exists) return 0;
-  //
-  //   return (snapshot.value as num).toInt();
-  // }
-  // Future<int> getAvailableTestCount() async {
-  //
-  //   try {
-  //     final deviceId = selectedDeviceId.trim();
-  //     final ref = dbRef.child(
-  //         "Devices/${widget.user.mobile}/$deviceId/testCount");
-  //
-  //     final snapshot = await ref.get();
-  //
-  //
-  //     if (!snapshot.exists || snapshot.value == null) return 0;
-  //
-  //
-  //     final value = snapshot.value;
-  //     showMessage(
-  //         "Device: $selectedDeviceId | Value: $value"
-  //     );
-  //     if (value is int) return value;
-  //     if (value is num) return value.toInt();
-  //     if (value is String) return int.tryParse(value) ??  0;
-  //
-  //     return 0;
-  //   } catch (e) {
-  //     print("Error in getAvailableTestCount: $e");
-  //     return 0;
-  //   }
-  // }
 
   Future<int> getAvailableTestCount() async {
     try {
@@ -1612,24 +1510,6 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       return 0;
     }
   }
-  // Future<int> _decreaseTestCount() async {
-  //   final ref = dbRef.child(
-  //       "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
-  //
-  //   int newValue = 0;
-  //
-  //   await ref.runTransaction((current) {
-  //     if (current == null) {
-  //       newValue = 0;
-  //       return Transaction.success(0);
-  //     }
-  //     final val = (current as num).toInt();
-  //     newValue = val > 0 ? val - 1 : 0;
-  //
-  //     return Transaction.success(newValue);
-  //   });
-  //   return newValue; // 🔥 important
-  // }
   Future<int> _decreaseTestCount() async {
     final ref = dbRef.child(
         "Devices/${widget.user.mobile}/$selectedDeviceId/testCount");
@@ -1981,105 +1861,16 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     }
   }
 
-  // Future<void> showIOSDebugDialog(String message) async {
-  //   if (!mounted) return;
-  //
-  //   Future.delayed(Duration.zero, () {
-  //     if (!mounted) return;
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: true,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           title: Text("DEBUG"),
-  //           content: SingleChildScrollView(
-  //             child: Text(message),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.of(ctx).pop(),
-  //               child: Text("OK"),
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
-
 
   Future<void> showResultPopup_2(Map<String, dynamic> data,int latestCount) async {
-    if (Platform.isIOS) {
-      // final latestCount = await getAvailableTestCount();
-      return showIOSResultDialog(data,latestCount);
-    } else {
-      return showResultPopup(data);
-    }
+    // if (Platform.isIOS) {
+    //   // final latestCount = await getAvailableTestCount();
+    //   return showIOSResultDialog(data,latestCount);
+    // } else {
+    //   return showResultPopup(data);
+    // }
+    await showResultDialog(data, latestCount);   // ← single function
   }
-
-  // Future<void> showIOSResultDialog(Map<String, dynamic> data,int latestCount) async {
-  //   // int latestCount = await getAvailableTestCount();
-  //   // int latestCount = await getAvailableTestCount();
-  //   showMessage("latestCount before dialog: $latestCount");
-  //
-  //
-  //   // debug
-  //   showMessage("FINAL COUNT: $latestCount");
-  //   if (!mounted) return;
-  //
-  //   Future.delayed(Duration.zero, () {
-  //     if (!mounted) return;
-  //
-  //     String message = "";
-  //
-  //     if (data.containsKey("error")) {
-  //       message = data["error"];
-  //     } else {
-  //       message =
-  //           "Protein: ${data["P"]?["value"] ?? data["P"] ?? "--"}\n"
-  //           "Urine Creatinine: ${data["U"]?["value"] ?? data["U"] ?? "--"}\n"
-  //           "Serum Creatinine: ${data["S"]?["value"] ?? data["S"] ?? "--"}\n"
-  //           "eGFR: ${data["e"]?["value"] ?? data["e"] ?? "--"}\n"
-  //           "P/C Ratio: ${data["r"]?["value"] ?? data["r"] ?? "--"}\n\n"
-  //           // 🔥 NEW LINE (Available Test)
-  //               "Available Tests: $latestCount";
-  //           }
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           title: Text("Test Result"),
-  //           content: SingleChildScrollView(
-  //             child: Text(message),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 Navigator.of(ctx).pop();
-  //
-  //                 if (!mounted) return;
-  //
-  //                 Navigator.pushReplacement(
-  //                   context,
-  //                   MaterialPageRoute(
-  //                     builder: (_) => MyDevicesPage2(user: widget.user),
-  //                   ),
-  //                 );
-  //
-  //                 await disconnectDevice();
-  //               },
-  //               child: Text("OK"),
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
-
   Future<void> showIOSResultDialog(Map<String, dynamic> data, int latestCount) async {
     if (!mounted) return;
 
@@ -2132,78 +1923,107 @@ class _TestFlowScreenState extends State<TestFlowScreen>
     });
   }
 
-  // Future<void> showIOSResultDialog(Map<String, dynamic> data) async {
-  //
-  //   int latestCount = await getAvailableTestCount() - 1;
-  //
-  //   if (!mounted) return;
-  //
-  //   Future.delayed(Duration.zero, () {
-  //     if (!mounted) return;
-  //
-  //     String format(String label, dynamic value) {
-  //       return "$label : ${value ?? "--"}";
-  //     }
-  //
-  //     String message = "";
-  //
-  //     if (data.containsKey("error")) {
-  //       message = data["error"];
-  //     } else {
-  //       message =
-  //           "${format("Protein", data["P"]?["value"] ?? data["P"])}\n\n"
-  //           "${format("Urine Creatinine", data["U"]?["value"] ?? data["U"])}\n\n"
-  //           "${format("Serum Creatinine", data["S"]?["value"] ?? data["S"])}\n\n"
-  //           "${format("eGFR", data["e"]?["value"] ?? data["e"])}\n\n"
-  //           "${format("P/C Ratio", data["r"]?["value"] ?? data["r"])}\n\n";
-  //           // "----------------------\n"
-  //           "\nAvailable Tests : $latestCount";
-  //     }
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (ctx) {
-  //         return AlertDialog(
-  //           title: Text("Test Result"),
-  //           content: SingleChildScrollView(
-  //             child: Text(
-  //               message,
-  //               style: TextStyle(
-  //                 height: 1.5, // 🔥 spacing improve
-  //                 fontSize: 14,
-  //               ),
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 Navigator.of(ctx).pop();
-  //
-  //                 if (!mounted) return;
-  //
-  //                 Navigator.pushReplacement(
-  //                   context,
-  //                   MaterialPageRoute(
-  //                     builder: (_) => MyDevicesPage2(user: widget.user),
-  //                   ),
-  //                 );
-  //
-  //                 await disconnectDevice();
-  //               },
-  //               child: Text("OK"),
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
-  // void showMessage(String msg) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text(msg)),
-  //   );
-  // }
+  // ==================== SINGLE RESULT DIALOG FOR BOTH ANDROID & iOS ====================
+
+  Future<void> showResultDialog(Map<String, dynamic> data, int latestCount) async {
+    if (!mounted) return;
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final bool isIOS = Platform.isIOS;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text("Test Result"),
+        content: data.containsKey("error")
+            ? Text(data["error"]!)
+            : isIOS
+            ? SingleChildScrollView(           // iOS → Clean Text (no icons)
+          child: Text(
+            _buildIOSResultText(data, latestCount),
+            style: const TextStyle(height: 1.6, fontSize: 15.5),
+          ),
+        )
+            : Column(                          // Android → Rich layout with icons
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _resultRow(Icons.science, "Protein", "P", data),
+            _resultRow(Icons.water_drop, "Urine Creatinine", "U", data),
+            _resultRow(Icons.biotech, "Serum Creatinine", "S", data),
+            _resultRow(Icons.bar_chart, "eGFR", "e", data),
+            _resultRow(Icons.balance, "P/C Ratio", "r", data),
+            const SizedBox(height: 16),
+            Text(
+              "Available Tests: $latestCount",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: getTestCountColor(latestCount),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+
+              if (!mounted) return;
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MyDevicesPage2(user: widget.user),
+                ),
+              );
+
+              await disconnectDevice();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+// ==================== iOS ke liye Text Builder (with NA logic) ====================
+
+  String _buildIOSResultText(Map<String, dynamic> data, int latestCount) {
+    String format(String key, dynamic rawValue) {
+      String value = "--";
+
+      if (rawValue is Map) {
+        value = rawValue["value"] ?? "--";
+      } else if (rawValue is String) {
+        value = rawValue;
+      }
+
+      // 🔥 Same logic as formatValue function
+      value = value.trim();
+
+      if (value == "-1.00" || value == "-1" || value == "-1.0" || value.startsWith("-")) {
+        value = "NA";
+      }
+
+      if (value.toLowerCase() == "absent" || value == "0.00" || value == "0" || value == "0.0") {
+        if (key == "P") value = "Absent";
+      }
+
+      return value;
+    }
+
+    return
+      "Protein: ${format("P", data["P"])}\n"
+          "Urine Creatinine: ${format("U", data["U"])}\n"
+          "Serum Creatinine: ${format("S", data["S"])}\n"
+          "eGFR: ${format("e", data["e"])}\n"
+          "P/C Ratio: ${format("r", data["r"])}\n\n"
+          "Available Tests: $latestCount";
+  }
 }
 class CalibrationDialog extends StatefulWidget {
   // final Function(String) sendCommand;
