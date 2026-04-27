@@ -741,7 +741,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
       Future.delayed(Duration.zero, () {
         if (!mounted) return;
 
-        showMessage("✅ Fresh Count for Dialog: $freshCount");
+        // showMessage("✅ Fresh Count for Dialog: $freshCount");
 
         showResultPopup_2(parsed, freshCount);
       });
@@ -1600,7 +1600,7 @@ class _TestFlowScreenState extends State<TestFlowScreen>
         }
       }
 
-      showMessage("📊 TestCount -> Device: $selectedDeviceId | Value: $value");
+      // showMessage("📊 TestCount -> Device: $selectedDeviceId | Value: $value");
 
       if (value is int) return value;
       if (value is num) return value.toInt();
@@ -2199,11 +2199,11 @@ class _TestFlowScreenState extends State<TestFlowScreen>
   //     );
   //   });
   // }
-  void showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
-  }
+  // void showMessage(String msg) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text(msg)),
+  //   );
+  // }
 }
 class CalibrationDialog extends StatefulWidget {
   // final Function(String) sendCommand;

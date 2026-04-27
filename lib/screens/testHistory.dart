@@ -919,8 +919,16 @@ class _TesthistoryPageState extends State<TesthistoryPage> {
     final Uint8List bytes = await pdf.save();
     // final file = File("${dir.path}/History_${widget.user.name}.pdf");
 
-    final dir = await getExternalStorageDirectory();
-    final file = File("${dir!.path}/History_${widget.user.name}.pdf");
+    // final dir = await getExternalStorageDirectory();
+    Directory dir;
+
+    if (Platform.isAndroid) {
+      dir = (await getExternalStorageDirectory())!;
+    } else {
+      // iOS
+      dir = await getTemporaryDirectory();
+    }
+    final file = File("${dir.path}/History_${widget.user.name}.pdf");
 
     // await file.writeAsBytes(bytes);
     //
