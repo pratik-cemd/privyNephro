@@ -53,6 +53,8 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2>
   Map<String, String?> deviceResult = {}; // shows processing/result text
   Map<String, int> deviceStage = {};
 
+  Map<String, double> deviceBattery = {}; //Device battery
+
   final Map<String, int> _previousCounts = {};
   List<Map<String, dynamic>> updatedNewTest = [];
   StreamSubscription<DatabaseEvent>? _deviceListener;
@@ -91,7 +93,12 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2>
     tts.setPitch(1.0); //voice
     // syncPendingResults();
   }
-
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onAppResume(); // 🔁 user wapas aaya → retry
+    }
+  }
   /* -------------------- STARTUP VALIDATION -------------------- */
   Future<void> _initPermissions() async {
     if (Platform.isAndroid) {
@@ -521,6 +528,9 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2>
                                   ],
                                 ),
                               ),
+                              // 👉 RIGHT SIDE ICON (Battery)
+                              const SizedBox(width: 10),
+                              _buildBatteryWidget(key),
                             ],
                           ),
                         ),
@@ -768,7 +778,16 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2>
       }
 
       if (rawResult.contains("PATIENT_SAVED")) {
+        double? battery;
+        if (rawResult.contains(",")) {
+          battery = double.tryParse(rawResult.split(",")[1].trim());
+        }
 
+        if (battery != null) {
+          setState(() {
+            deviceBattery[selectedDeviceId] = battery!;
+          });
+        }
         if (!mounted) return;
 
         await speak(
@@ -1648,5 +1667,65 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2>
     ].request();
 
     return statuses.values.every((s) => s.isGranted);
+  }
+
+  Future<void> _onAppResume() async {
+    bool locEnabled = await Permission.location.serviceStatus.isEnabled;
+
+    if (locEnabled && Platform.isAndroid) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+
+  Widget _buildBatteryWidget(String key) {
+    final battery = deviceBattery[key];
+
+    if (battery == null) {
+      return const SizedBox(); // hide if no data
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          getBatteryIcon(battery),
+          color: getBatteryColor(battery),
+          size: 24,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          // "${battery.toStringAsFixed(2)}V",
+          "${batteryToPercent(battery).toStringAsFixed(0)}%",
+          style: TextStyle(
+            fontSize: 12,
+            color: getBatteryColor(battery),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData getBatteryIcon(double voltage) {
+    if (voltage >= 4.0) return Icons.battery_full;
+    if (voltage >= 3.7) return Icons.battery_6_bar;
+    if (voltage >= 3.5) return Icons.battery_4_bar;
+    if (voltage >= 3.3) return Icons.battery_2_bar;
+    return Icons.battery_alert;
+  }
+
+  Color getBatteryColor(double voltage) {
+    if (voltage >= 4.0) return Colors.green;       // full
+    if (voltage >= 3.7) return Colors.lightGreen;  // good
+    if (voltage >= 3.5) return Colors.orange;      // medium
+    if (voltage >= 3.3) return Colors.deepOrange;  // low
+    return Colors.red;                             // critical
+  }
+  double batteryToPercent(double voltage) {
+    double percent = ((voltage - 3.3) / (4.2 - 3.3)) * 100;
+    return percent.clamp(0, 100);
   }
 }
