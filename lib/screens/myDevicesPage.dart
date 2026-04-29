@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io' ;
 import 'dart:typed_data';
 
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -29,7 +31,8 @@ class MyDevicesPage2 extends StatefulWidget {
   State<MyDevicesPage2> createState() => _MyDevicesPageState2();
 }
 
-class _MyDevicesPageState2 extends State<MyDevicesPage2> {
+class _MyDevicesPageState2 extends State<MyDevicesPage2>
+    with WidgetsBindingObserver{
   final dbRef = FirebaseDatabase.instance.ref();
   FlutterTts tts = FlutterTts();  //voice
   bool isMuted = false; //voice
@@ -69,6 +72,14 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
   @override
   void initState() {
     super.initState();
+    _initSetup();
+
+    FlutterBluePlus.adapterState.listen((state) {
+      if (state == BluetoothAdapterState.on) {
+        _initSetup(); // auto resume
+      }
+    });
+    WidgetsBinding.instance.addObserver(this);
     _warmupBluetooth(); // 🔥 ADD THIS
     _initPermissions(); //ok
     _startupValidation(); //ok
@@ -1078,7 +1089,7 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
     String date =
         "${now.day.toString().padLeft(2, '0')}-"
         "${now.month.toString().padLeft(2, '0')}-"
-        "${now.year.toString().substring(2)} ";
+        "${now.year.toString().substring(2)}_"
 
     // Format time → HH:mm:ss
     // String time =
@@ -1441,11 +1452,19 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              // onPressed: () => Navigator.pop(context, false),
+              onPressed: () async {
+                await tts.stop(); // 👈 STOP TTS
+                Navigator.pop(context, false);
+              },
               child: const Text("Cancel"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
+              // onPressed: () => Navigator.pop(context, true),
+              onPressed: () async {
+                await tts.stop(); // 👈 STOP TTS
+                Navigator.pop(context, true);
+              },
               child: const Text("Continue"),
             ),
           ],
@@ -1525,5 +1544,109 @@ class _MyDevicesPageState2 extends State<MyDevicesPage2> {
       await FlutterBluePlus.adapterState.first;
       await Future.delayed(const Duration(milliseconds: 500));
     } catch (_) {}
+  }
+
+  Future<void> _initSetup() async {
+    bool bt = await _ensureBluetoothOn();
+    if (!bt) return;
+
+    if(Platform.isAndroid) {
+      bool loc = await _ensureLocationOn();
+      if (!loc) return;
+    }
+
+    bool permission = await _checkPermissions();
+    if (!permission) return;
+
+    print("Start process");
+  }
+  Future<bool> _ensureBluetoothOn() async {
+    try {
+      final state = await FlutterBluePlus.adapterState
+          .firstWhere((s) =>
+      s == BluetoothAdapterState.on ||
+          s == BluetoothAdapterState.off)
+          .timeout(const Duration(seconds: 3), onTimeout: () {
+        return BluetoothAdapterState.on; // assume ON (iOS safe fallback)
+      });
+
+      if (state == BluetoothAdapterState.on) return true;
+
+      bool userWants = await _askUser(
+        "Bluetooth Required",
+        "Please turn ON Bluetooth to continue",
+      );
+
+      if (!userWants) return false;
+
+      if (Platform.isAndroid) {
+        await FlutterBluePlus.turnOn();
+        await FlutterBluePlus.adapterState
+            .firstWhere((s) => s == BluetoothAdapterState.on);
+        return true;
+      } else {
+        await AppSettings.openAppSettings();
+        return true; // iOS pe assume karo user ON karega
+      }
+    } catch (e) {
+      print("Bluetooth check error: $e");
+      return true; // 🔥 important fallback for iOS
+    }
+  }
+  Future<bool> _ensureLocationOn() async {
+    // if (!Platform.isAndroid) return true;
+    if (Platform.isIOS) return true;
+
+    bool enabled = await Permission.location.serviceStatus.isEnabled;
+    if (enabled) return true;
+
+    bool userWants = await _askUser(
+      "Location Required",
+      "Please turn ON LocatifinalPS)",
+    );
+
+    if (!userWants) return false;
+
+    const intent = AndroidIntent(
+      action: 'android.settings.LOCATION_SOURCE_SETTINGS',
+    );
+    await intent.launch();
+
+    // 👇 wait thoda aur phir re-check
+    await Future.delayed(const Duration(seconds: 2));
+
+    return await Permission.location.serviceStatus.isEnabled;
+  }
+
+  Future<bool> _askUser(String title, String msg) async {
+    bool? result = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(msg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Turn ON"),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
+  Future<bool> _checkPermissions() async {
+    final statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
+
+    return statuses.values.every((s) => s.isGranted);
   }
 }

@@ -2205,11 +2205,24 @@ class _CalibrationDialogState extends State<CalibrationDialog>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
+      // title: Row(
+      //   children: const [
+      //     Icon(Icons.science, color: Colors.blue),
+      //     SizedBox(width: 10),
+      //     Text("Device Calibration"),
+      //   ],
+      // ),
       title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
           Icon(Icons.science, color: Colors.blue),
           SizedBox(width: 10),
-          Text("Device Calibration"),
+          Expanded(
+            child: Text(
+              "Device Calibration",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
       content: Column(

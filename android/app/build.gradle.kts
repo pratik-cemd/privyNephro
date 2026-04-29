@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.privynephro.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -18,20 +18,32 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+//    kotlinOptions {
+//        jvmTarget = JavaVersion.VERSION_17.toString()
+//    }
+    // ✅ Updated Kotlin JVM config (no deprecation warning)
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.privynephro.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        targetSdk = 36
+//        versionCode = flutter.versionCode
+//        versionName = flutter.versionName
+        // ✅ FIX for flutterVersionCode issue
+        val flutterVersionCode = project.findProperty("flutter.versionCode")?.toString() ?: "1"
+        val flutterVersionName = project.findProperty("flutter.versionName")?.toString() ?: "1.0"
+
+        versionCode = flutterVersionCode.toInt()
+        versionName = flutterVersionName
     }
+
 
     buildTypes {
         release {

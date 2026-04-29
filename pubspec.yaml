@@ -35,15 +35,18 @@ dependencies:
   share_plus: ^12.0.1
   intl: ^0.20.2
   flutter_image_compress: ^2.3.0
-  flutter_bluetooth_serial:
-    git:
-      url: https://github.com/edufolly/flutter_bluetooth_serial.git
-      ref: master
+#  flutter_bluetooth_serial:
+#    git:
+#      url: https://github.com/edufolly/flutter_bluetooth_serial.git
+#      ref: master
 #  permission_handler: ^12.0.1
   flutter_reactive_ble: ^5.0.3
 #  permission_handler: ^11.3.0
   permission_handler: ^12.0.1
   flutter_tts: ^3.8.5   #voice command
+  app_settings: ^5.1.1 #bt and location
+  android_intent_plus: ^5.0.2
+
 
 dev_dependencies:
   flutter_test:
